@@ -17,6 +17,7 @@ scipy.special.gammaln = mygammaln
 import scipy.stats
 
 def autoparamnames(ndim):
+    """Generate names for parameters."""
     return ['param%d' % (i+1) for i in range(ndim)]
 
 def null_transform(x):
@@ -24,6 +25,7 @@ def null_transform(x):
 
 
 def get_asymgauss(ndim):
+    """d-dimensional Gaussian with diverse standard deviations."""
     sigmamin = 10**(-10 + ndim**0.5/2)
     if ndim == 4:
         assert np.isclose(sigmamin, 1e-9), sigmamin
@@ -221,6 +223,7 @@ def get_stdfunnel4(ndim, gamma=0):
     return paramnames, loglike_vectorized, transform_vectorized, True, None
 
 def get_rosenbrock(ndim):
+    """Rosenbock's function problem, with -2 factor"""
     
     def loglike(theta):
         a = theta[:,:-1]
@@ -233,6 +236,7 @@ def get_rosenbrock(ndim):
     return autoparamnames(ndim), loglike, transform, True, None
 
 def get_halfrosenbrock(ndim):
+    """Rosenbock's function problem, with -1 factor"""
     
     def loglike(theta):
         a = theta[:,:-1]
@@ -245,6 +249,7 @@ def get_halfrosenbrock(ndim):
     return autoparamnames(ndim), loglike, transform, True, None
 
 def get_eggbox(ndim):
+    """Eggbox problem"""
     assert ndim == 2
     
     def loglike(z):
@@ -257,6 +262,7 @@ def get_eggbox(ndim):
     return ["a", "b"], loglike, transform, True, None
 
 def get_beta(ndim):
+    """Factorized beta distribution with random parameters."""
     rng = np.random.RandomState(ndim)
     a_values = 10**rng.uniform(-1, 1, size=ndim)
     b_values = 10**rng.uniform(-1, 1, size=ndim)
@@ -270,6 +276,7 @@ def get_beta(ndim):
     return autoparamnames(ndim), loglike, null_transform, True, (a_values, b_values)
 
 def get_loggamma(ndim):
+    """4-mode LogGamma problem, factorized with gaussians and loggamma distributions."""
     assert ndim >= 2
     rv1a = scipy.stats.loggamma(1, loc=2./3, scale=1./30)
     rv1b = scipy.stats.loggamma(1, loc=1./3, scale=1./30)
@@ -295,6 +302,7 @@ def get_loggamma(ndim):
     return autoparamnames(ndim), loglike, null_transform, True, ((rv1a, rv1b), (rv2a, rv2b), rv_rest)
 
 def get_multisine_nonvectorized(ncomponents, Ndata = 40, contrast = 100):
+    """Fit of a sinosoidal light curve with random measurement times."""
     rng = np.random.RandomState(2)
     jitter_true = 0.1
     phase_true = 0.
@@ -349,6 +357,7 @@ def get_multisine_nonvectorized(ncomponents, Ndata = 40, contrast = 100):
     return paramnames, loglike, null_transform, False, data
 
 def get_multisine(ncomponents, Ndata = 40, contrast = 100):
+    """Fit of a sinosoidal light curve with random measurement times."""
     rng = np.random.RandomState(2)
     jitter_true = 0.1
     phase_true = 0.
@@ -404,6 +413,7 @@ def get_multisine(ncomponents, Ndata = 40, contrast = 100):
     return paramnames, loglike, transform, True, data
 
 def get_box(ndim):
+    """High box on a Gaussian."""
     
     def loglike(theta):
         delta = np.max(theta, axis=1)
@@ -413,6 +423,37 @@ def get_box(ndim):
         return u
     
     return autoparamnames(ndim), loglike, transform, True, None
+
+
+def get_spike_and_slab(ndim, sigma2, offset=0):
+    """Mixture of two gaussians.
+
+    The narrower gaussian has standard deviation sigma2, and 
+    shifted by offset in each direction.
+    The wider gaussian has standard deviation sigma1=1.0.
+    """
+    sigma1 = 1.0
+    assert sigma2 < sigma1, (sigma2, sigma1)
+    # const1 = 0.5 / np.sqrt(2 * np.pi * sigma1**2) ** ndim
+    # const2 = 0.5 / np.sqrt(2 * np.pi * sigma2**2) ** ndim
+    logconst1 = -np.log(0.5) - 0.5 * np.log(2 * np.pi * sigma1**2) * ndim
+    logconst2 = -np.log(0.5) - 0.5 * np.log(2 * np.pi * sigma2**2) * ndim
+
+    def loglike(theta):
+        logL1 = logconst1 - 0.5 * (((theta - offset)**2).sum() / sigma1)
+        logL2 = logconst2 - 0.5 * (theta**2).sum() / sigma2
+        # L1 = np.exp(-0.5 * ((theta - offset).sum() / sigma2)) * const1
+        # L2 = np.exp(-0.5 * (theta.sum() / sigma2)) * const2
+        # L = np.log(L1 + L2)
+        L = np.logaddexp(logL1, logL2)
+        if not L > -1e300:
+            return -1e300
+        return L
+
+    def transform(u):
+        return u * 20 - 10
+
+    return autoparamnames(ndim), loglike, transform, False, None
 
 
 problems = [
@@ -453,6 +494,10 @@ problems = [
     ('loggamma-10d', get_loggamma(10)),
     ('loggamma-30d', get_loggamma(30)),
     ('box-5d', get_box(5)),
+    ('spikeslab-1d', get_spike_and_slab(1, 1./400)),
+    ('spikeslab-2d', get_spike_and_slab(2, 1./400)),
+    ('spikeslab-4d', get_spike_and_slab(4, 1./400)),
+    ('spikeslab-8d', get_spike_and_slab(8, 1./400)),
 ]
 
 if __name__ == '__main__':
