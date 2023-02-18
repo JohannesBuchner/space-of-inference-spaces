@@ -425,26 +425,23 @@ def get_box(ndim):
     return autoparamnames(ndim), loglike, transform, True, None
 
 
-def get_spike_and_slab(ndim, sigma2, offset=0):
+def get_spike_and_slab(ndim, factor, offset=0, weight1=1):
     """Mixture of two gaussians.
 
     The narrower gaussian has standard deviation sigma2, and 
     shifted by offset in each direction.
     The wider gaussian has standard deviation sigma1=1.0.
     """
+    sigma2 = 1.0 * factor**(-1. / ndim)
+    # print("factor:", factor, "sigma:", sigma2)
     sigma1 = 1.0
     assert sigma2 < sigma1, (sigma2, sigma1)
-    # const1 = 0.5 / np.sqrt(2 * np.pi * sigma1**2) ** ndim
-    # const2 = 0.5 / np.sqrt(2 * np.pi * sigma2**2) ** ndim
-    logconst1 = -np.log(0.5) - 0.5 * np.log(2 * np.pi * sigma1**2) * ndim
-    logconst2 = -np.log(0.5) - 0.5 * np.log(2 * np.pi * sigma2**2) * ndim
+    logconst1 = -np.log(weight1 / (1 + weight1)) - 0.5 * np.log(2 * np.pi * sigma1**2) * ndim
+    logconst2 = -np.log(1 / (1 + weight1)) - 0.5 * np.log(2 * np.pi * sigma2**2) * ndim
 
     def loglike(theta):
-        logL1 = logconst1 - 0.5 * (((theta - offset)**2).sum() / sigma1)
-        logL2 = logconst2 - 0.5 * (theta**2).sum() / sigma2
-        # L1 = np.exp(-0.5 * ((theta - offset).sum() / sigma2)) * const1
-        # L2 = np.exp(-0.5 * (theta.sum() / sigma2)) * const2
-        # L = np.log(L1 + L2)
+        logL1 = logconst1 - 0.5 * (((theta - offset * sigma1)**2).sum() / sigma1**2)
+        logL2 = logconst2 - 0.5 * (theta**2).sum() / sigma2**2
         L = np.logaddexp(logL1, logL2)
         if not L > -1e300:
             return -1e300
@@ -494,10 +491,30 @@ problems = [
     ('loggamma-10d', get_loggamma(10)),
     ('loggamma-30d', get_loggamma(30)),
     ('box-5d', get_box(5)),
-    ('spikeslab-1d', get_spike_and_slab(1, 1./400)),
-    ('spikeslab-2d', get_spike_and_slab(2, 1./400)),
-    ('spikeslab-4d', get_spike_and_slab(4, 1./400)),
-    ('spikeslab-8d', get_spike_and_slab(8, 1./400)),
+    ('spikeslab1-2d-4', get_spike_and_slab(2, 4)),
+    ('spikeslab1-2d-40', get_spike_and_slab(2, 40)),
+    ('spikeslab1-2d-400', get_spike_and_slab(2, 400)),
+    ('spikeslab1-2d-4000', get_spike_and_slab(2, 4000)),
+    ('spikeslab40-2d-4', get_spike_and_slab(2, 4, weight1=40)),
+    ('spikeslab40-2d-40', get_spike_and_slab(2, 40, weight1=40)),
+    ('spikeslab40-2d-400', get_spike_and_slab(2, 400, weight1=40)),
+    ('spikeslab40-2d-4000', get_spike_and_slab(2, 4000, weight1=40)),
+    ('spikeslab1000-2d-4', get_spike_and_slab(2, 4, weight1=1000)),
+    ('spikeslab1000-2d-40', get_spike_and_slab(2, 40, weight1=1000)),
+    ('spikeslab1000-2d-400', get_spike_and_slab(2, 400, weight1=1000)),
+    ('spikeslab1000-2d-4000', get_spike_and_slab(2, 4000, weight1=1000)),
+    ('spikeslab1000-2d-40-off1', get_spike_and_slab(2, 40, 1, weight1=1000)),
+    ('spikeslab1000-2d-40-off2', get_spike_and_slab(2, 40, 2, weight1=1000)),
+    ('spikeslab1000-2d-40-off4', get_spike_and_slab(2, 40, 4, weight1=1000)),
+    ('spikeslab1000-2d-40-off10', get_spike_and_slab(2, 40, 10, weight1=1000)),
+    ('spikeslab40-2d-40-off1', get_spike_and_slab(2, 40, 1, weight1=40)),
+    ('spikeslab40-2d-40-off2', get_spike_and_slab(2, 40, 2, weight1=40)),
+    ('spikeslab40-2d-40-off4', get_spike_and_slab(2, 40, 4, weight1=40)),
+    ('spikeslab40-2d-40-off10', get_spike_and_slab(2, 40, 10, weight1=40)),
+    ('spikeslab1-2d-40-off1', get_spike_and_slab(2, 40, 1)),
+    ('spikeslab1-2d-40-off2', get_spike_and_slab(2, 40, 2)),
+    ('spikeslab1-2d-40-off4', get_spike_and_slab(2, 40, 4)),
+    ('spikeslab1-2d-40-off10', get_spike_and_slab(2, 40, 10)),
 ]
 
 if __name__ == '__main__':

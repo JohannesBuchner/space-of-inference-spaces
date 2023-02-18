@@ -1,0 +1,16 @@
+exoplanets	exo-transient	systematiclogs/transit/ultranest-safe/
+exoplanets	exo-rv-0	systematiclogs/exoplanet-rvs_0005.txt-0/ultranest-safe
+exoplanets	exo-rv-1	systematiclogs/exoplanet-rvs_0005.txt-1/ultranest-safe
+exoplanets	exo-rv-2	systematiclogs/exoplanet-rvs_0005.txt-2/ultranest-fast-fixed4d
+exoplanets	exo-rv-3	systematiclogs/exoplanet-rvs_0005.txt-3/ultranest-fast-fixed4d
+transients	SLSN-LSQ12dlf	systematiclogs/mosfit-LSQ12dlf/ultranest/
+transients	Magnetar-LSQ12dlf	systematiclogs/mosfit-LSQ12dlf-magnetar/ultranest/
+transients	GRB-080916C	systematiclogs/grb-2/ultranest/
+supernova remnants	Crab	systematiclogs/crab/ultranest/
+extragalactic	xray-AGN-spectrum	systematiclogs/xrayagnspec/ultranest-safe/
+gravitational waves	ligo-GW	systematiclogs/ligo/ultranest-fast-fixed4d/
+extragalactic	powerlaw-relation	systematiclogs/line/ultranest-safe/	
+extragalactic	dist-gauss	systematiclogs/posteriorstacker/posteriorstacker-flex11/	
+extragalactic	dist-hist	systematiclogs/posteriorstacker/posteriorstacker-gauss/	
+materials	LJ6	systematiclogs/LJ6/
+astroparticle	icecube-neutrinos	systematiclogs/icecube/ultranest-safe

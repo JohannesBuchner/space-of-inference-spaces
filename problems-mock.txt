@@ -1,0 +1,5 @@
+mock	Compton-thick-AGN	systematiclogs/xrayspectrum40-0.01/	
+mock	multisine-0-comp	systematiclogs/multisine-0comp-2d/ultranest-safe/
+mock	multisine-1-comp	systematiclogs/multisine-1comp-5d/ultranest-safe/
+mock	multisine-2-comp	systematiclogs/multisine-2comp-8d/ultranest-fast-fixed4d/
+mock	multisine-3-comp	systematiclogs/multisine-3comp-11d/ultranest-fast-fixed4d/

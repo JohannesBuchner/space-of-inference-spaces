@@ -1,0 +1,17 @@
+toy	asymgauss-4d	systematiclogs/asymgauss-4d/ultranest-safe/
+toy	asymgauss-16d	systematiclogs/asymgauss-16d/ultranest-fast-fixed4d/
+#toy	asymgauss-100d	systematiclogs/asymgauss-100d/ultranest-fast-fixed4d/
+toy	beta-2d	systematiclogs/beta-2d/ultranest-safe/
+toy	beta-10d	systematiclogs/beta-10d/ultranest-safe/
+toy	beta-30d	systematiclogs/beta-30d/ultranest-fast-fixed4d/
+toy	box-5d	systematiclogs/box-5d/ultranest-safe/
+toy	eggbox-2d	systematiclogs/eggbox-2d/ultranest-safe/
+toy	loggamma-2d	systematiclogs/loggamma-2d/ultranest-safe/
+toy	loggamma-10d	systematiclogs/loggamma-10d/ultranest-safe/
+toy	loggamma-30d	systematiclogs/loggamma-30d/ultranest-fast-fixed4d/
+toy	rosenbrock-2d	systematiclogs/rosenbrock-2d/ultranest-safe/
+toy	rosenbrock-20d	systematiclogs/rosenbrock-20d/ultranest-safe/
+#toy	rosenbrock-50d	systematiclogs/rosenbrock-50d/ultranest-fast-fixed4d/
+toy	corrfunnel-2d	systematiclogs/corrfunnel4-2d/ultranest-safe/
+toy	corrfunnel-10d	systematiclogs/corrfunnel4-10d/ultranest-safe/
+#toy	corrfunnel-50d	systematiclogs/corrfunnel4-50d/ultranest-fast-fixed4d/
