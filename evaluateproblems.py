@@ -470,72 +470,16 @@ def compute_gaussian_approximation_loss(eqsamples, prob, logL, problem_dimension
 
     return np.abs(surprise) / problem_dimensionality
 
-def trim_properties(problem_dimensionality,
-        problem_depth,
-        problem_width,
-        nmodes,
-        problem_asymmetry,
-        problem_gaussianity,
-        problem_convexity):
+def count_posterior_modes(problem_name, eqsamples, problem_dimensionality):
+    """Count modes.
 
-    problem_depth_safe = min(3, problem_depth)
-    problem_width_safe = max(0, min(7, problem_width))
-    nmodes_safe = min(nmodes, 10)
-    problem_asymmetry_safe = min(100, problem_asymmetry)
-    problem_gaussianity_safe = min(0.5, problem_gaussianity)
-    problem_convexity_safe = max(1e-3, problem_convexity)
-    return [
-        problem_dimensionality,
-        problem_depth_safe,
-        problem_width_safe,
-        nmodes_safe,
-        problem_asymmetry_safe,
-        problem_gaussianity_safe,
-        problem_convexity_safe,
-    ]
+    Makes a histogram of the posterior samples in each parameter,
+    makes a cut at 20% of the maximum posterior.
+    If there is a gap below that, creates a split in that parameter.
 
-
-def evaluate_problem(problem_name, folder):
-    #print("loading %s ..." % folder)
-    #info = json.load(open("%s/info/results.json" % folder))
-    sequence, results, livepoint_sequence = getinfo(folder)
-    
-    u = results['weighted_samples']['upoints']
-    w = results['weighted_samples']['weights']
-    IG = np.zeros(len(results['posterior']['information_gain_bits']))
-    for i in range(len(IG)):
-        H, _ = np.histogram(u[:,i], weights=w, density=True, bins=np.linspace(0, 1, 1000))
-        H[H < 1e-10] = 1e-10
-        Href = H * 0 + 1.
-        assert np.allclose(Href.mean(), 1)
-        IG[i] = (np.log2(Href / H) * Href).mean()
-
-    problem_dimensionality = len(results['paramnames'])
-    #problem_depth = min(15, info['H'] / problem_dimensionality)
-    logvol, p, logl = logVcurve(sequence)
-    problem_convexity, volmax, volmid, volmin = visualise_logVcurve(folder, problem_name, logvol, p, logl, results['logz'])
-
-    #print('logvol:', logvol)
-    problem_depth = -volmid / np.log(10) / problem_dimensionality
-    # problem_width = compute_problem_width(logvol, p, logl)
-    problem_width = abs(volmax - volmin) / np.log(10) - np.log10(problem_dimensionality)
-    
-    prob = results['weighted_samples']['weights']
-    logL = results['weighted_samples']['logl']
-    # samples = results['weighted_samples']['points']
-
-
-    eqsamples = results['samples']
-    visualise_problem(folder, problem_name, results, eqsamples)
-    problem_gaussianity = compute_gaussian_approximation_loss(eqsamples, prob, logL, problem_dimensionality)
-
-    # logstds = 0.5 * np.log10(np.diag(cov))
-    # compute information gain for each parameter
-    # IG = np.array(results['posterior']['information_gain_bits'])
-    problem_asymmetry = max(IG.max(), 1) / max(IG.min(), 1)
-    print("asymmetry:",  problem_asymmetry,  IG.max(), IG.min(), IG)
-    # problem_asymmetry = logstds.max() - logstds.min()
-
+    Finally, iterates through all split combinations and counts
+    each "mode" if it contains posterior samples.
+    """
     #nmodes = 1
     # count the number of clusters
     # 1) project each axis and find cuts
@@ -609,25 +553,77 @@ def evaluate_problem(problem_name, folder):
         clusters = np.unique(cluster_assignment)
         nmodes = (clusters > -1).sum()
     else:
+        # at most one axis has splits
         nmodes = max(len(t) for t in thresholds)
     if problem_name.startswith('beta') and problem_dimensionality == 30:
         nmodes = 1024
+    return nmodes
 
-    #cl = sklearn.cluster.OPTICS(metric='mahalanobis', metric_params=dict(VI=a))
-    #print("clustering...")
-    #cl.fit(eqsamples[:1000,:])
-    #nclusters = len(cl.cluster_hierarchy_)
-    #problem_largest_gap = nclusters
-    #print("clustering done: %d clusters" % nclusters)
 
-    #Z = scipy.cluster.hierarchy.linkage(eqsamples[:1000,:], method='single', metric='mahalanobis')
-    #print(Z[-1], "adds:", Z[-1,-1], Z[-2,-1])
-    #print(Z[-1], "adds:", Z[int(Z[-1,-1])-1000,-1], Z[int(Z[-2,-1])-1000,-1])
-    #distance_steps = np.log(Z[-30:,2] / Z[-31:-1,2])
-    #print(distance_steps, (distance_steps[-1] - distance_steps[:-5].mean()), (distance_steps[:-5]).std())
-    #problem_largest_gap = (distance_steps[-1] - distance_steps[:-5].mean())
-    #problem_largest_gap = max(0, -problem_largest_gap)
+def trim_properties(problem_dimensionality,
+        problem_depth,
+        problem_width,
+        nmodes,
+        problem_asymmetry,
+        problem_gaussianity,
+        problem_convexity):
 
+    problem_depth_safe = min(3, problem_depth)
+    problem_width_safe = max(0, min(7, problem_width))
+    nmodes_safe = min(nmodes, 10)
+    problem_asymmetry_safe = min(100, problem_asymmetry)
+    problem_gaussianity_safe = min(0.5, problem_gaussianity)
+    problem_convexity_safe = max(1e-3, problem_convexity)
+    return [
+        problem_dimensionality,
+        problem_depth_safe,
+        problem_width_safe,
+        nmodes_safe,
+        problem_asymmetry_safe,
+        problem_gaussianity_safe,
+        problem_convexity_safe,
+    ]
+
+
+def evaluate_problem(problem_name, folder):
+    sequence, results, livepoint_sequence = getinfo(folder)
+    
+    u = results['weighted_samples']['upoints']
+    w = results['weighted_samples']['weights']
+    IG = np.zeros(len(results['posterior']['information_gain_bits']))
+    for i in range(len(IG)):
+        H, _ = np.histogram(u[:,i], weights=w, density=True, bins=np.linspace(0, 1, 1000))
+        H[H < 1e-10] = 1e-10
+        Href = H * 0 + 1.
+        assert np.allclose(Href.mean(), 1)
+        IG[i] = (np.log2(Href / H) * Href).mean()
+
+    problem_dimensionality = len(results['paramnames'])
+    #problem_depth = min(15, info['H'] / problem_dimensionality)
+    logvol, p, logl = logVcurve(sequence)
+    problem_convexity, volmax, volmid, volmin = visualise_logVcurve(folder, problem_name, logvol, p, logl, results['logz'])
+
+    problem_depth = -volmid / np.log(10) / problem_dimensionality
+    # problem_width = compute_problem_width(logvol, p, logl)
+    problem_width = abs(volmax - volmin) / np.log(10) - np.log10(problem_dimensionality)
+    
+    prob = results['weighted_samples']['weights']
+    logL = results['weighted_samples']['logl']
+    # samples = results['weighted_samples']['points']
+
+
+    eqsamples = results['samples']
+    visualise_problem(folder, problem_name, results, eqsamples)
+    problem_gaussianity = compute_gaussian_approximation_loss(eqsamples, prob, logL, problem_dimensionality)
+
+    # logstds = 0.5 * np.log10(np.diag(cov))
+    # compute information gain for each parameter
+    # problem_asymmetry = logstds.max() - logstds.min()
+    problem_asymmetry = max(IG.max(), 1) / max(IG.min(), 1)
+    print("asymmetry:",  problem_asymmetry,  IG.max(), IG.min(), IG)
+
+    nmodes = count_posterior_modes(problem_name, eqsamples, problem_dimensionality)
+    
     problem_properties = [
         problem_dimensionality,
         problem_depth,
