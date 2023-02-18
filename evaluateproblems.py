@@ -1,3 +1,4 @@
+from cycler import cycler
 import itertools
 from datetime import datetime
 import numpy as np
@@ -9,6 +10,7 @@ from getdist import MCSamples, plots
 from ultranest.netiter import MultiCounter, PointPile, TreeNode, BreadthFirstIterator, combine_results
 import h5py
 import gzip
+import shutil
 
 from joblib import Memory
 mem = Memory('.', verbose=False)
@@ -180,7 +182,11 @@ def read_file(log_dir, x_dim, num_bootstraps=20, random=True, verbose=False, che
     points = fileobj['points'][:]
     fileobj.close()
     del fileobj
-    stack = list(enumerate(points))
+    #stack = list(enumerate(points))
+    row_Lmins = points[:,0]
+    row_Ls = points[:,1]
+    handled = np.zeros(len(points), dtype=bool)
+    # first_todo = 0
 
     pointpile = PointPile(x_dim, num_params)
 
@@ -189,12 +195,15 @@ def read_file(log_dir, x_dim, num_bootstraps=20, random=True, verbose=False, che
         # look forward to see if there is an exact match
         # if we do not use the exact matches
         #   this causes a shift in the loglikelihoods
-        for i, (idx, next_row) in enumerate(stack):
-            row_Lmin = next_row[0]
-            L = next_row[1]
-            if row_Lmin <= Lmin and L > Lmin:
-                idx, row = stack.pop(i)
-                return idx, row
+        mask = np.logical_and(~handled, np.logical_and(row_Lmins <= Lmin, row_Ls > Lmin))
+        if not mask.any():
+            return None, None
+        else:
+            idxs, = np.where(mask)
+            i = idxs[0]
+            handled[i] = True
+            return i, points[i]
+            
         return None, None
 
     roots = []
@@ -246,6 +255,61 @@ def logVcurve(sequence):
     c_sorted = p_sorted.cumsum()
     return V_sorted, c_sorted, logl_sorted
 
+def maxof(a, b):
+    return np.where(a>b, a, b)
+
+def convex_completion(x, y):
+    assert len(x) == len(y), (len(x), len(y))
+    ynew = y.copy()
+    # iterate from left (lowest x)
+    i = 0
+    while i < len(x) - 1:
+        # draw line to higher values
+        ypred = ynew[i] + -1 * (x[i+1:] - x[i])
+        # check if it the real curve is above anywhere
+        # but skip if the next one is better
+        if ynew[i+1] < ypred[0] and np.any(ynew[i+1:] > ypred):
+            next_i = np.where(ynew[i+1:] > ypred)[0][0]
+            ynew[i+1:i+1+next_i] = maxof(ynew[i+1:i+1+next_i], ypred[:next_i])
+        # continue
+        i += 1
+
+    return ynew
+
+def visualise_logVcurve(folder, problem_name, logvol, p, logl, logz):
+    volmax, volmid, volmin = np.interp([0.025, 0.50, 0.975], p, logvol)
+    logl_convex = convex_completion(logvol[::-1], logl[::-1])[::-1]
+    logz_simple = np.log(np.trapz(np.exp(logvol), np.exp(logl - logl.max()))) + logl.max()
+    logz_convex = np.log(np.trapz(np.exp(logvol), np.exp(logl_convex - logl_convex.max()))) + logl_convex.max()
+    plt.figure()
+    plt.subplot(1, 2, 1)
+    plt.plot(np.exp(logvol), np.exp(logl - logl.max()))
+    plt.plot(np.exp(logvol), np.exp(logl_convex - logl_convex.max()), ':')
+    #plt.ylim(1000, + 1)
+    #plt.xlim(np.exp(volmin) / 2, np.exp(volmid) * 2)
+    plt.xlim(0, np.exp(volmid))
+    plt.xlabel('Prior mass')
+    plt.ylabel('Likelihood')
+    plt.subplot(1, 2, 2)
+    plt.title("convex: %.1f%%" % (100 * (1 - np.exp(logz_simple - logz_convex))))
+    #plt.title("logz: %.1f" % (logz))
+    plt.plot(logvol, logl, label='%.1f' % logz_simple)
+    plt.plot(logvol, logl_convex, ':', label='%.1f' % logz_convex)
+    #color = l.get_color()
+    #plt.plot(volmax, logl.max() + np.log(0.95), 'o ', color=color, ms=4)
+    #plt.plot(volmin, logl.max() + np.log(0.05), 'o ', color=color, ms=4)
+    #plt.plot(volmid, logl.max() + np.log(0.50), 'x ', color=color, ms=4, mew=2)
+    plt.vlines([volmid], logl.max() - 50, logl.max(), colors=['lightgray'])
+    plt.fill_between([volmin, volmax], [logl.max() - 50] * 2, [logl.max()] * 2,
+        color='lightgray', alpha=0.25)
+    plt.ylim(logl.max() - 50, logl.max())
+    plt.legend(loc='upper right')
+    plt.xlabel('ln(Prior mass)')
+    plt.ylabel('ln(Likelihood)')
+    plt.subplots_adjust(wspace=0.3)
+    plt.savefig(folder + '/logVlogL.pdf')
+    plt.close()
+    return (1 - np.exp(logz_simple - logz_convex)), volmax, volmid, volmin
 
 def visualise_problem(folder, problem_name, info, eqsamples):
     if os.path.exists(folder + '/simplified_posterior2d.pdf'):
@@ -331,8 +395,25 @@ def visualise_problem(folder, problem_name, info, eqsamples):
     #plt.xlabel(paramnames[i])
     #plt.ylabel(paramnames[j])
     print("plotting to %s/simplified_posterior2d.pdf" % folder)
-    plt.savefig(folder + '/simplified_posterior2d.pdf', bbox_inches='tight')
+    plt.savefig(folder + '/simplified_posterior2d.pdf')
     plt.close()
+
+
+def simplify_problem_name(problem_name):
+    if problem_name.startswith('spikeslab'):
+        return 'spike+slab'
+    if problem_name.split('-')[-1].endswith('d'):
+        try:
+            int(problem_name.split('-')[-1][:-1])
+            return '-'.join(problem_name.split('-')[:-1])
+        except Exception:
+            pass
+    try:
+        int(problem_name.split('-')[-1])
+        return '-'.join(problem_name.split('-')[:-1])
+    except Exception:
+        pass
+    return problem_name
 
 def get_cost(folder):
     data = []
@@ -357,12 +438,15 @@ def get_cost(folder):
             last_time = time
 
     # print("conclusion:", np.nanmedian(data))
-    return np.nanmedian(data)
+    if len(data) == 0 and folder == 'systematiclogs/cmb-cosmology/ultranest-safe/':
+        return 1000 # about one per second, estimated from log file by eye
 
-def compute_problem_width(prob):
+    return np.nanmedian(data[-1000:])
+
+def compute_problem_width_orig(prob):
     cumprob = prob.cumsum()
-    mask_lo = cumprob < 0.05 * prob.sum()
-    mask_hi = cumprob > 0.95 * prob.sum()
+    mask_lo = cumprob < 0.025 * prob.sum()
+    mask_hi = cumprob > 0.975 * prob.sum()
 
     prob_lo = prob[mask_lo][-1]
     prob_hi = prob[mask_hi][0]
@@ -386,35 +470,71 @@ def compute_gaussian_approximation_loss(eqsamples, prob, logL, problem_dimension
 
     return np.abs(surprise) / problem_dimensionality
 
+def trim_properties(problem_dimensionality,
+        problem_depth,
+        problem_width,
+        nmodes,
+        problem_asymmetry,
+        problem_gaussianity,
+        problem_convexity):
+
+    problem_depth_safe = min(3, problem_depth)
+    problem_width_safe = max(0, min(7, problem_width))
+    nmodes_safe = min(nmodes, 10)
+    problem_asymmetry_safe = min(100, problem_asymmetry)
+    problem_gaussianity_safe = min(0.5, problem_gaussianity)
+    problem_convexity_safe = max(1e-3, problem_convexity)
+    return [
+        problem_dimensionality,
+        problem_depth_safe,
+        problem_width_safe,
+        nmodes_safe,
+        problem_asymmetry_safe,
+        problem_gaussianity_safe,
+        problem_convexity_safe,
+    ]
+
+
 def evaluate_problem(problem_name, folder):
     #print("loading %s ..." % folder)
     #info = json.load(open("%s/info/results.json" % folder))
     sequence, results, livepoint_sequence = getinfo(folder)
+    
+    u = results['weighted_samples']['upoints']
+    w = results['weighted_samples']['weights']
+    IG = np.zeros(len(results['posterior']['information_gain_bits']))
+    for i in range(len(IG)):
+        H, _ = np.histogram(u[:,i], weights=w, density=True, bins=np.linspace(0, 1, 1000))
+        H[H < 1e-10] = 1e-10
+        Href = H * 0 + 1.
+        assert np.allclose(Href.mean(), 1)
+        IG[i] = (np.log2(Href / H) * Href).mean()
 
     problem_dimensionality = len(results['paramnames'])
     #problem_depth = min(15, info['H'] / problem_dimensionality)
     logvol, p, logl = logVcurve(sequence)
-    #print('logvol:', logvol)
-    problem_depth_safe = min(10, -np.interp(0.50, p, logvol) / np.log(10) / problem_dimensionality)
+    problem_convexity, volmax, volmid, volmin = visualise_logVcurve(folder, problem_name, logvol, p, logl, results['logz'])
 
+    #print('logvol:', logvol)
+    problem_depth = -volmid / np.log(10) / problem_dimensionality
+    # problem_width = compute_problem_width(logvol, p, logl)
+    problem_width = abs(volmax - volmin) / np.log(10) - np.log10(problem_dimensionality)
     
     prob = results['weighted_samples']['weights']
     logL = results['weighted_samples']['logl']
     # samples = results['weighted_samples']['points']
 
-    problem_width = compute_problem_width(prob)
-    problem_width_safe = min(2, problem_width)
 
     eqsamples = results['samples']
     visualise_problem(folder, problem_name, results, eqsamples)
     problem_gaussianity = compute_gaussian_approximation_loss(eqsamples, prob, logL, problem_dimensionality)
-    problem_gaussianity_safe = min(1, problem_gaussianity)
 
     # logstds = 0.5 * np.log10(np.diag(cov))
     # compute information gain for each parameter
-    problem_asymmetry = results['information_gain_bits'].max() / results['information_gain_bits'].min()
-    problem_asymmetry = logstds.max() - logstds.min()
-    problem_asymmetry_safe = min(6, problem_asymmetry)
+    # IG = np.array(results['posterior']['information_gain_bits'])
+    problem_asymmetry = max(IG.max(), 1) / max(IG.min(), 1)
+    print("asymmetry:",  problem_asymmetry,  IG.max(), IG.min(), IG)
+    # problem_asymmetry = logstds.max() - logstds.min()
 
     #nmodes = 1
     # count the number of clusters
@@ -458,7 +578,7 @@ def evaluate_problem(problem_name, folder):
     nmodes_max = np.product([len(t) for t in thresholds])
     # deduplicate:
     if nmodes_max > 10000:
-        #print("  cannot consider all %d clustering combinations ..." % (nmodes_max))
+        print("  cannot consider all %d clustering combinations ..." % (nmodes_max))
         nmodes = nmodes_max
     elif sum(len(t) > 1 for t in thresholds) > 1:
         #print("  considering %d clustering combinations ..." % (nmodes_max))
@@ -490,8 +610,8 @@ def evaluate_problem(problem_name, folder):
         nmodes = (clusters > -1).sum()
     else:
         nmodes = max(len(t) for t in thresholds)
-
-    nmodes_safe = min(nmodes, 10)
+    if problem_name.startswith('beta') and problem_dimensionality == 30:
+        nmodes = 1024
 
     #cl = sklearn.cluster.OPTICS(metric='mahalanobis', metric_params=dict(VI=a))
     #print("clustering...")
@@ -510,54 +630,88 @@ def evaluate_problem(problem_name, folder):
 
     problem_properties = [
         problem_dimensionality,
-        nmodes_safe,
-        problem_gaussianity_safe,
-        problem_asymmetry_safe,
-        problem_width_safe,
-        problem_depth_safe,
+        problem_depth,
+        problem_width,
+        nmodes,
+        problem_asymmetry,
+        problem_gaussianity,
+        problem_convexity,
     ]
     return problem_properties, (logvol, p, logl)
 
-def main():
+def main(filename):
     #properties_names_short = ["ndim", "multimodality", "non-gaussianity", "asymmetry", "width", "depth"]
-    properties_names_short = ['ndim', 'modes', '!gauss', 'asym', 'width', 'depth', 'problem']
-    properties_names = ["Dimensionality", "Multimodality", "Non-Gaussianity", "Parameter\nInequality", "Tail Weight", "Depth"]
-    bin_separators = [[9, 29], [2, 5], [0.5], [2], [1], [2]]
+    properties_names_short = ['dim', 'depth', 'width', 'modes', 'asym', '!gauss', 'phase']
+    properties_names = ["Dimensionality", "Depth", "Width", "Modes", "Inequality", "Non-Gaussianity", 'Transition']
+
+    bin_separators = [[9, 29], [2], [4], [2, 5], [5], [0.2], [0.02]]
     bin_members = defaultdict(list)
 
-    fout = open('evaluateproblems.tex', 'w')
+    fout = open('evaluateproblems.tex.tmp', 'w')
     fout.write("""
-\begin{tabular}{l|cccc}
-%-20s & dim & cost & modes & width & depth & !gauss & asym \\
-\hline
-\hline
-""" % ("name"))
+\\begin{tabular}{ll|%s}
+%-20s & %-20s & %s \\\\
+\\hline
+\\hline
+""" % (
+    'rr' + 'c' * (len(properties_names_short) - 1), "field", "name", 
+    ' & '.join(properties_names_short[:1] + ['cost'] + properties_names_short[1:])))
     problem_names = []
     properties_list = []
     LVs = []
-    fout.write('\t'.join(properties_names_short) + '\n')
-    print('%-20s & %s' % ("name", '\t'.join(properties_names_short)))
+    print('%-20s & %s' % ("name", '\t'.join(properties_names_short[:1] + ['cost'] + properties_names_short[1:])))
     real_problems = set()
+    mock_problems = set()
     last_field = ""
-    for line in open('problems.txt'):
+
+    plt.rcParams['axes.prop_cycle'] = cycler('color', [
+        '#008fd5', '#fc4f30', '#e5ae38', '#6d904f', '#8b8b8b', '#810f7c', '#111111',
+        'tab:brown',
+        'tab:pink',
+        'tab:olive',
+        'tab:gray',
+        'tab:cyan',
+        'tab:blue',
+        'tab:orange',
+        'tab:green',
+        'tab:red',
+        'tab:purple',
+    ])
+    for line in open(filename):
+        if line.startswith('#'):
+            continue
         print(line.rstrip())
-        field, problem_name, folder = line.rstrip().split('\t')
-        if field != 'toy': continue
+        field, problem_name_orig, folder = line.rstrip().split('\t')
+        #if field != 'mock': continue
+        problem_name = simplify_problem_name(problem_name_orig)
+        #if problem_name == 'spike+slab':
+        #    continue
         cost = get_cost(folder)
         assert os.path.exists("%s/info/results.json" % folder), folder
         assert os.path.exists("%s/results/points.hdf5" % folder), folder
-        p, logVcurve_data = evaluate_problem(problem_name, folder)
-        if field != last_field:
-            fout.write(r'\multicolumn{8}{l}{%s}' % field)
-            fout.write("\n" + r'\hline' + "\n")
-        s = '%-20s & %d & %4.0f & %4.1f & %3.1f & %3.2f & %3.2f & %3.2f' % tuple([problem_name] + p[:1] + [cost] + p[1:])
+        p_unsafe, logVcurve_data = evaluate_problem(problem_name, folder)
+        p = trim_properties(*p_unsafe)
+        if field != last_field and field in ('toy', 'mock'):
+            fout.write(r'\hline' + "\n")
+        #    fout.write(r'\multicolumn{9}{l}{%s} \\' % field)
+        #    fout.write("\n" + r'\hline' + "\n")
+        #    last_field = field
+        s = '%-20s & %-20s & %-3d & %-4d & %-4.2f & %-2.1f & %4d & %-3.2f & %-3.2f & %-2.3f' % tuple(
+            [field if field != last_field else '', problem_name_orig] + p_unsafe[:1] + [cost] + p_unsafe[1:])
+        
+        last_field = field
         print(s)
-        fout.write(s + '\n')
+        fout.write(s + ' \\\\\n')
+        fout.flush()
         problem_names.append(problem_name)
         if field not in ('toy', 'mock'):
             real_problems.add(problem_name)
+        elif field == 'mock':
+            mock_problems.add(problem_name)
+        
         properties_list.append(p)
 
+        """
         index = 0
         for prop, seps in zip(p, bin_separators):
             index_here = sum(prop >= s for s in seps)
@@ -570,11 +724,13 @@ def main():
             print("%s redundant with %s: index %d" % (folder, bin_members[index][0], index))
         bin_members[index].append(folder)
         del index
+        """
 
         LVs.append((problem_name, logVcurve_data))
     fout.write("""\end{tabular}
 """)
     fout.close()
+    shutil.move('evaluateproblems.tex.tmp', 'evaluateproblems.tex')
 
     print("analysing what types of problems are missing...")
     out = open('evaluate_missing.txt', 'w')
@@ -592,7 +748,10 @@ def main():
         out.write("%d: %10s\n" % (len(bin_members[index]), ' '.join(name)))
         del p
 
-    problem_names_unique = sorted(set(problem_names))
+    problem_names_unique = []
+    for p in problem_names:
+        if p not in problem_names_unique:
+            problem_names_unique.append(p)
     properties = np.array(properties_list)
     nprops = properties.shape[1]
 
@@ -606,10 +765,11 @@ def main():
             for problem_name in problem_names_unique:
                 mask = [p == problem_name for p in problem_names]
                 r, = plt.plot(properties[mask,j], properties[mask,i],
-                    marker='o' if problem_name in real_problems else 's', 
-                    ms=12, mew=1, 
+                    marker='o' if problem_name in real_problems else ('s' if problem_name in mock_problems else 'x'),
+                    ms=12 if problem_name != 'spike+slab' else 4, mew=1, 
                     mfc='None' if problem_name not in real_problems else None, 
                     label=problem_name, 
+                    alpha=0.5 if problem_name == 'spike+slab' else 1,
                     ls=' ')
                 colors[problem_name] = r.get_color()
             if j == i + 1:
@@ -622,29 +782,38 @@ def main():
             if i == 0:
                 plt.yscale('log')
                 plt.yticks([1, 5, 10, 30, 100], [1, 5, 10, 30, 100])
-                plt.ylim(None, 104)
-            if i == 1:
+                #plt.ylim(1, 104)
+            # plt.text(0.98, 0.98, 'i=%d,j=%d' % (i,j), va='top', ha='right', transform=plt.gca().transAxes)
+            if i == 3:
                 plt.yscale('log')
                 plt.yticks([1, 2, 4, 10], [1, 2, 4, 10])
-            if j == nprops - 1:
-                plt.xscale('log')
-                plt.xticks([0.5, 1, 5], ['0.5', '1', '5'])
-                #plt.xlim(0.3, None)
-            if j == 0:
-                plt.xlim(0.8, 104)
-            if j == 1:
+            if j == 3:
                 plt.xscale('log')
                 plt.xticks([1, 2, 4, 10], [1, 2, 4, 10])
-                #plt.xlim(1, 11)
-            #if i == 4:
+            if j == 4:
+                plt.xscale('log')
+                plt.xticks([1, 2, 4, 10, 40, 100], [1, 2, 4, 10, 40, 100])
+            if i == 4:
+                plt.yscale('log')
+                plt.yticks([1, 2, 4, 10, 40, 100], [1, 2, 4, 10, 40, 100])
+            #if j == 5:
+            #    plt.xscale('log')
+            #if i == 5:
+            #    plt.yscale('log')
+            if j == 6:
+                plt.xscale('log')
+            #if j == nprops - 2:
+            #    plt.xscale('log')
+            #    plt.xticks([0.5, 1, 5], ['0.5', '1', '5'] if i == j else [''] * 3)
+            #    #plt.xlim(1, 11)
             yticks, yticklabels = plt.yticks()
             xticks, xticklabels = plt.xticks()
             xlo, xhi = plt.xlim()
             ylo, yhi = plt.ylim()
             #xhi *= 1.2
             #yhi *= 1.3
-            plt.vlines(bin_separators[j], ylo, yhi, linestyles=[':']*10, lw=0.2, color='gray', alpha=0.5)
-            plt.hlines(bin_separators[i], xlo, xhi, linestyles=[':']*10, lw=0.2, color='gray', alpha=0.5)
+            plt.vlines(bin_separators[j], ylo, yhi, lw=0.2, color='gray', alpha=0.5)
+            plt.hlines(bin_separators[i], xlo, xhi, lw=0.2, color='gray', alpha=0.5)
             if j != i + 1:
                 if yticks[-1] / yhi > 0.95:
                     plt.yticks(yticks[:-1], ['' for t in yticks[:-1]])
@@ -661,37 +830,41 @@ def main():
             plt.ylim(ylo, yhi)
 
         if i == 0:
-            plt.legend(loc='best', prop=dict(size=16), bbox_to_anchor=(-2.5, -2.5))
+            plt.legend(loc='upper left', prop=dict(size=16), bbox_to_anchor=(-5.5, -1.0), numpoints=1)
     plt.subplots_adjust(wspace=0, hspace=0)
     plt.savefig("evaluateproblems.pdf", bbox_inches='tight')
     plt.close()
 
     print("plotting volcurves")
-    plt.figure(figsize=(12, 3.))
+    plt.figure(figsize=(10, 3.))
     used = {}
-    for problem_name, (logvol, p, logl) in LVs:
+    for problem_name, (lnvol, p, logl) in LVs:
         # identify point where p=5% and 95%
-        #print(problem_name, p)
-        volmax, volmid, volmin = np.interp([0.05, 0.50, 0.95], p, logvol)
+        p[0] = 0
+        # print(problem_name, p[0], logvol[0])
+        logvol = lnvol / np.log(10)
+        #volmax, volmid, volmin = np.interp([0.05, 0.50, 0.95], p, logvol)
         color = colors[problem_name]
-        m = '-' if problem_name in real_problems else '--'
+        m = '-' if problem_name in real_problems else ('--' if problem_name in mock_problems else ':')
         if problem_name in used:
-            plt.plot(np.exp(logvol), 1 - p, m, color=color)
+            plt.plot(-logvol, 1 - p, m, color=color, alpha=0.2 if problem_name == 'spike+slab' else 1)
         else:
-            plt.plot(np.exp(logvol), 1 - p, m, label=problem_name, color=color)
+            plt.plot(-logvol, 1 - p, m, label=problem_name, color=color, alpha=0.2 if problem_name == 'spike+slab' else 1)
         used[problem_name] = True
-        plt.plot(np.exp(volmax), [0.95], 'o ', color=color, ms=4)
-        plt.plot(np.exp(volmin), [0.05], 'o ', color=color, ms=4)
-        plt.plot(np.exp(volmid), [0.50], 'x ', color=color, ms=4, mew=2)
+        #plt.plot(-volmax, [0.95], 'o ', color=color, ms=4)
+        #plt.plot(-volmin, [0.05], 'o ', color=color, ms=4)
+        #plt.plot(-volmid, [0.50], 'x ', color=color, ms=4, mew=2)
 
     plt.xscale('log')
-    plt.xlim(1e-53, 1)
-    plt.xticks([1e-50, 1e-40, 1e-30, 1e-20, 1e-10, 1])
+    plt.xlim(0.5, 260)
+    plt.xticks([100, 30, 10, 3, 1], ['$10^{-100}$', '$10^{-30}$', '$10^{-10}$', '$10^{-3}$', '$10^{-1}$'])
+    #plt.gca().xaxis.grid(False, which='minor')
+    #plt.gca().xaxis.grid(False, which='major')
     plt.legend(loc='lower right', ncol=6, bbox_to_anchor=(1.0, 1.04))
-    plt.xlabel('Fraction of prior volume', size=20)
-    plt.ylabel('Probability enclosed', size=20)
+    plt.xlabel('Prior mass')
+    plt.ylabel('Posterior enclosed')
     plt.savefig("evaluateproblems_volcurve.pdf", bbox_inches='tight')
     plt.close()
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1])
