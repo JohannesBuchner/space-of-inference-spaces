@@ -48,8 +48,9 @@ RUN cd class_public-3.2.0/python/ && python setup.py build && python setup.py in
 # that ftp server does not operate anymore, replace with https:
 RUN sed --in-place 's,ftp://heasarc.gsfc.nasa.gov/,https://heasarc.gsfc.nasa.gov/FTP/,g' code/plc*/plc*/waf_tools/cfitsio.py
 RUN cd code/plc*/plc* && python3 waf configure --install_all_deps && python3 waf install && cd -
-RUN wget -O - "https://github.com/brinckmann/montepython_public/archive/refs/tags/v3.5.0.tar.gz" | tar -xzvf -
-RUN cd montepython_public-3.5.0/ && python montepython/MontePython.py --help && cd -
+# RUN wget -O - "https://github.com/brinckmann/montepython_public/archive/refs/tags/v3.5.0.tar.gz" | tar -xzvf -
+RUN git clone "https://github.com/JohannesBuchner/montepython_public/"
+RUN cd montepython_public/ && python montepython/MontePython.py --help && cd -
 
 RUN pip install git+https://github.com/icecube/pisa pycbc snowline cobaya juliet 
 
