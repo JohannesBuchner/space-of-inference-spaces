@@ -436,8 +436,8 @@ def get_spike_and_slab(ndim, factor, offset=0, weight1=1):
     # print("factor:", factor, "sigma:", sigma2)
     sigma1 = 1.0
     assert sigma2 < sigma1, (sigma2, sigma1)
-    logconst1 = -np.log(weight1 / (1 + weight1)) - 0.5 * np.log(2 * np.pi * sigma1**2) * ndim
-    logconst2 = -np.log(1 / (1 + weight1)) - 0.5 * np.log(2 * np.pi * sigma2**2) * ndim
+    logconst1 = np.log(weight1 / (1 + weight1)) - 0.5 * np.log(2 * np.pi * sigma1**2) * ndim
+    logconst2 = np.log(1 / (1 + weight1)) - 0.5 * np.log(2 * np.pi * sigma2**2) * ndim
 
     def loglike(theta):
         logL1 = logconst1 - 0.5 * (((theta - offset * sigma1)**2).sum() / sigma1**2)

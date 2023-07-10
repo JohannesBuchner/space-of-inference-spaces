@@ -40,7 +40,6 @@ RUN wget "http://pla.esac.esa.int/pla/aio/product-action?COSMOLOGY.FILE_ID=COM_L
 
 # pisa requirements
 RUN mamba install -y -c conda-forge decorator "fast-histogram>=0.10" nlopt h5py iminuit numba "pint<=0.19" pandas simplejson pytables tabulate uncertainties llvmlite py-cpuinfo sympy cython && mamba clean --all
-#RUN mamba install -y -c https://cxc.cfa.harvard.edu/conda/ciao -c conda-forge ciao sherpa bxa && mamba clean --all
 
 RUN make -C class_public-3.2.0 
 RUN cd class_public-3.2.0/python/ && python setup.py build && python setup.py install && cd -
@@ -56,22 +55,31 @@ RUN pip install git+https://github.com/icecube/pisa pycbc snowline cobaya juliet
 
 COPY exoplanet exoplanet
 COPY juliet juliet
-COPY montepython_public montepython_public
+#COPY montepython_public montepython_public
 #COPY cobaya cobaya
 RUN pwd
 RUN echo ${HOME}
 RUN ls /home
 
+COPY default.conf montepython_public/default.conf
 RUN cd montepython_public/ && python montepython/MontePython.py --help && cd -
 RUN cd /refdata/fermi; ln -s /refdata/
 #RUN cd cobaya/cobaya; ls; pip install .
 RUN pip uninstall -y fermipy; pip install "fermipy>=1.2"
 RUN git clone https://github.com/JohannesBuchner/PosteriorStacker 
-RUN cd PosteriorStacker; python PosteriorStacker/posteriorstacker.py  --help
+RUN cd PosteriorStacker; python posteriorstacker.py  --help
+
+# install X-ray analysis stuff, into a separate conda environment
+RUN mamba create -n ciao -y -c https://cxc.cfa.harvard.edu/conda/ciao -c conda-forge ciao sherpa bxa && mamba clean --all
+RUN git clone https://github.com/JohannesBuchner/BXA 
 
 COPY ultranest_sampler.py /opt/conda/lib/python3.9/site-packages/threeML/bayesian/ultranest_sampler.py
 COPY *.py ./
 COPY *.sh ./
+
+COPY uxclumpy-cutoff-omni.fits BXA/examples/sherpa/
+COPY uxclumpy-cutoff.fits BXA/examples/sherpa/
+RUN echo 179.pi  0.5 8 > BXA/examples/sherpa/chandra/filenames.txt
 
 RUN python importtester.py
 RUN mkdir -p /root/modules/observables/filters/

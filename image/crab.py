@@ -95,8 +95,10 @@ bayes = BayesianAnalysis(model, data)
 
 for param in model.free_parameters.values():
     if param.has_transformation():
+        print("log-uniform prior assigned to:", param)
         param.set_uninformative_prior(Log_uniform_prior)
     else:
+        print("uniform prior assigned to:", param)
         param.set_uninformative_prior(Uniform_prior)
 
 model.display()

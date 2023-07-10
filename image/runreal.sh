@@ -48,3 +48,13 @@ done
 
 # for posteriorstacker-gauss and posteriorstacker-flex11
 # cd PosteriorStacker; python PosteriorStacker/run.py
+
+# for xrayagnspec:
+#   conda activate ciao
+#   cd BXA/examples/sherpa/chandra/
+#   MODELDIR=.. WITHAPEC=0 python ../xagnfitter.py
+#   mkdir /root/systematiclogs/agnxrayspec/
+#   cp -r 179.pi_out_withapec_zspec_/ /root/systematiclogs/agnxrayspec/ultranest/
+
+# for xrayspectrum:
+# for c in 40; do for b in 0.01; do python xrayspectrum.py --contrast=$c --background=$b --log_dir=systematiclogs/xrayspectrum$c-$b/ --reactive; done; done
