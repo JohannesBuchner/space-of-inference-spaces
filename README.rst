@@ -139,6 +139,15 @@ and modifications to those code bases were necessary to hook in the UltraNest sa
 The commands are documented in runreal.sh.
 These are currently: cosmology-CMB (montepython), mosfit, posteriorstacker, 3ML (crab.py, grb.py)
 
+Outputs
+-------
+
+For reference, outputs based on ultranest are available here:
+
+* https://www.mpe.mpg.de/~jbuchner/TEMP/reference-run-output.tar.gz
+
+problems.txt gives the mapping of folder and problem name.
+
 TODO
 ----
 
@@ -154,6 +163,7 @@ If you have difficult inference problems:
 * Do you have additional toy problems that cover a new parameter space that should be added? 
   Ideally it should be motivated by some physics problem.
 * Can you provide ground truth results from fine integrations?
+* Is the Lennard-Jones potential implemented sensibly?
 
 If you develop software:
 
