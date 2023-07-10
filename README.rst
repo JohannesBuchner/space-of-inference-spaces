@@ -111,7 +111,7 @@ To test, you can run the test sampler::
 	bash runtoy.sh testsampler
 	bash runreal.sh testsampler
 
-This is also run by default, and can be done in isolation:
+This is also run by default, and can be done in isolation::
 
 	docker run -it <HASH>
 
@@ -150,16 +150,20 @@ Please read the paper draft and provide feedback? Are there references missing, 
 Can you suggest a journal that may be interested?
 
 If you have difficult inference problems:
+
 * Do you have additional toy problems that cover a new parameter space that should be added? 
   Ideally it should be motivated by some physics problem.
 * Can you provide ground truth results from fine integrations?
 
 If you develop software:
+
 * Maybe add your own sampler? Which problems can it run?
+* Try to reproduce one example, if you run into problems, report as an issue.
 * Can you help bring the uniform interface (autosampler.py) into forks of montepython, 3ML, mosfit or posteriorstacker
   so we have a uniform interface for these as well?
 
 If you have machine learning experience:
+
 * Can you add a deep learning emulator to accelerate the very slow likelihood of icecube?
 * Can we approximate nested sampling run outputs with a fast, analytic model, so that we have a very similar inference problem but know the truth? For example, approximate with a gaussian mixture model or a deep neural network that predicts the log-likelihood?
 
