@@ -144,6 +144,7 @@ TODO
 Help is welcome! We need you!
 
 * If you run into any issues, please open a github issue!
+* Can you read the paper and provide feedback? Are there references missing, can the text be improved?
 * Can you provide ground truth results from fine integrations?
 * Maybe add your own sampler? Which problems can it run?
 * Can you add a deep learning emulator to accelerate the very slow likelihood of icecube?
