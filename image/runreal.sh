@@ -7,6 +7,7 @@ function runreal() {
 	p=$2
 	# arg 3: command to run
 	cmd=$3
+	
 	echo $s $p "[$cmd]"
 	# skip if already there
 	[ -e systematiclogs/$p/$s ] && return
@@ -22,11 +23,11 @@ function runreal() {
 
 }
 
+# iterate over the command line arguments (samplers):
 for s in $*
 do
 	runreal $s bixrayspectrum-30 bixrayspectrum.py --contrast=30  # via autosampler
 	runreal $s crab crab.py   # 3ML support a few samplers
-	runreal $s grb grb.py     # this is broken; 3ML support a few samplers
 	runreal $s transit exoplanet-transit.py
 	runreal $s exoplanet-rvs_0005.txt-0 "exoplanet.py --planets=0 --rvfile=exoplanet/rvs_0005.txt"
 	runreal $s exoplanet-rvs_0005.txt-1 "exoplanet.py --planets=1 --rvfile=exoplanet/rvs_0005.txt"
@@ -34,6 +35,8 @@ do
 	runreal $s ligo ligo.py   # PyCBC supports a few samplers
 	runreal $s icecube icecube.py  # via autosampler
 	
+	# this is broken: https://github.com/threeML/threeML/issues/622
+	# runreal $s grb grb.py     # 3ML support a few samplers
 done
 
 # for cosmology example:
