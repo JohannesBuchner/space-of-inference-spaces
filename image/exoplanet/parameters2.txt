@@ -1,0 +1,16 @@
+P_p1                    loguniform      1.25,10000
+t0_p1                   uniform         0,6.283185307179586
+K_p1                    modjeffreys     1,999
+ecc_p1                  uniform         0,1
+omega_p1                uniform         0,6.283185307179586
+P_p2                    loguniform      1.25,10000
+t0_p2                   uniform         0,6.283185307179586
+K_p2                    modjeffreys     1,999
+ecc_p2                  uniform         0,1
+omega_p2                uniform         0,6.283185307179586
+mu_sim                  uniform         -1000,1000
+sigma_w_sim             modjeffreys     1,99
+GP_sigma_sim            fixed           1.7320508075688772
+GP_alpha_sim            fixed           0.0008
+GP_Gamma_sim            fixed           4.0
+GP_Prot_sim             fixed           20.0

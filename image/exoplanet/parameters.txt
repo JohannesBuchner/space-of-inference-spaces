@@ -1,0 +1,11 @@
+P_p1                    loguniform      1.25,10000
+t0_p1                   uniform         0,6.283185307179586
+K_p1                    modjeffreys     1,999
+ecc_p1                  uniform         0,1
+omega_p1                uniform         0,6.283185307179586
+sigma_w_instrument      modjeffreys     1,99
+mu_w_instrument         uniform         -1000,1000
+GP_sigma                fixed           1.7320508075688772
+GP_alpha                fixed           0.0008
+GP_Gamma                fixed           4.0
+GP_Prot                 fixed           20.0

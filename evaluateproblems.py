@@ -4,13 +4,16 @@ from datetime import datetime
 import numpy as np
 import json
 import sys, os
+import gzip
+import shutil
 import matplotlib.pyplot as plt
+import h5py
 from collections import defaultdict
 from getdist import MCSamples, plots
 from ultranest.netiter import MultiCounter, PointPile, TreeNode, BreadthFirstIterator, combine_results
-import h5py
-import gzip
-import shutil
+from ultranest.mlfriends import AffineLayer, ScalingLayer, RobustEllipsoidRegion, bounding_ellipsoid
+import scipy.stats
+
 
 from joblib import Memory
 mem = Memory('.', verbose=False)
@@ -258,6 +261,32 @@ def logVcurve(sequence):
 def maxof(a, b):
     return np.where(a>b, a, b)
 
+@mem.cache
+def pearsonr(a):
+    ndim = a.shape[1]
+    rho = np.ones((ndim, ndim))
+    pval = np.zeros((ndim, ndim))
+    for j in range(ndim):
+        for k in range(j+1, ndim):
+            r, p = scipy.stats.pearsonr(a[:,j], a[:,k])
+            rho[j,k] = rho[k,j] = r
+            pval[j,k] = pval[k,j] = p
+    return rho, pval
+
+@mem.cache
+def spearmanr(a):
+    ndim = a.shape[1]
+    r, p = scipy.stats.spearmanr(a)
+    if np.size(p) == 1:
+        rho = np.ones((ndim, ndim)) 
+        pval = np.zeros((ndim, ndim))
+        rho[0,1] = rho[1,0] = r
+        pval[0,1] = pval[1,0] = p
+        return rho, pval
+    else:
+        return r, p
+
+@mem.cache
 def convex_completion(x, y):
     assert len(x) == len(y), (len(x), len(y))
     ynew = y.copy()
@@ -398,6 +427,114 @@ def visualise_problem(folder, problem_name, info, eqsamples):
     plt.savefig(folder + '/simplified_posterior2d.pdf')
     plt.close()
 
+@mem.cache
+def bounding_ellipsoid_logvolume(us):
+    null_transform = ScalingLayer()
+    region = RobustEllipsoidRegion(us, null_transform)
+    region.maxradiussq, region.enlarge = region.compute_enlargement()
+    #ctr, cov = bounding_ellipsoid(us)
+    #invcov = np.linalg.inv(cov)  # inverse covariance
+    # compute expansion factor
+    #delta = us - ctr
+    #region.enlarge = np.einsum('ij,jk,ik->i', delta, invcov, delta).max()
+    #region.maxradiussq = 1e300
+    region.create_ellipsoid()
+    #ctr, cov = bounding_ellipsoid(us)
+    #a = np.linalg.inv(cov)  # inverse covariance
+    #delta = us - ctr
+    #f = np.einsum('ij,jk,ik->i', delta, a, delta).max()
+    return region.estimate_volume()
+
+def visualise_restrictedprior_evolution(folder, problem_name, info, livepoint_sequence):
+
+    print("  %s/%s has %d live points snapshots" % (problem_name, folder, len(livepoint_sequence)))
+    x = []
+    y = []
+    a = []
+    b = []
+    c = []
+    d = []
+    nlive, ndim = livepoint_sequence[0][2].shape
+    
+    # skip the last where the number of live points goes down
+    for i, (logVremaining, logLmin, us, ps) in enumerate(livepoint_sequence):
+        if len(us) < nlive // 2:
+            continue
+        # (1) space complexity:
+        # plot volume of enclosing ellipsoid vs logV
+        logVell = bounding_ellipsoid_logvolume(us)
+        x.append(logVremaining)
+        y.append(logVell)
+
+        # (2) linear degeneracies:
+        # plot max{pearson correlation coefficient} vs logV
+        rho, pval = pearsonr(us)
+        rhomax, pvalmin, ntests = 0, 1, 0
+        for j in range(ndim):
+            for k in range(j+1, ndim):
+                rhomax = max(rhomax, abs(rho[j,k]))
+                pvalmin = min(pvalmin, pval[j,k])
+                ntests += 1
+        a.append(rhomax)
+        # apply bonferroni correction
+        b.append(min(1, pvalmin * ntests))
+        transform = AffineLayer()
+        #ctr = us.mean(axis=0).reshape((1,-1))
+        transform.optimize(us, us)
+        whitened_us = transform.transform(us)
+        
+        # (3) non-linear degeneracies:
+        # after whitening the live point coordinates, what is the spearman correlation rank?
+        # plot max{whitened spearman correlation rank} vs logV
+        #print(us, whitened_us)
+        rho, pval = spearmanr(whitened_us)
+        rhomax, pvalmin, ntests = 0, 1, 0
+        for j in range(ndim):
+            for k in range(j+1, ndim):
+                rhomax = max(rhomax, abs(rho[j,k]))
+                pvalmin = min(pvalmin, pval[j,k])
+                ntests += 1
+        c.append(rhomax)
+        # apply bonferroni correction
+        d.append(min(1, pvalmin * ntests))
+
+    print("  %s/%s had %d live points usable snapshots" % (problem_name, folder, len(x)))
+    
+    print("plotting to %s/livepoints_evolution.pdf" % folder)
+    x, y, a, b, c, d = [np.array(r) for r in [x, y, a, b, c, d]]
+    plt.figure(figsize=(8,8))
+    plt.subplot(2, 2, 1)
+    plt.suptitle(problem_name + '$_{%d}$' % ndim)
+    plt.plot(x, y, 'x-')
+    plt.xlabel('ln(Prior volume)')
+    plt.ylabel('ln(Enclosing ellipsoid volume)')
+    plt.subplot(2, 2, 3)
+    plt.plot(x, a, 'x-')
+    plt.xlabel('ln(Prior volume)')
+    plt.ylabel('Pearson correlation coefficient r')
+    plt.subplot(2, 2, 2)
+    plt.plot(a, c, 'x-')
+    mask_significant = np.logical_or(b < 0.01, d < 0.01)
+    plt.plot(a[mask_significant], c[mask_significant], 'o ', mfc=None)
+    plt.ylim(0, 1)
+    plt.xlim(0, 1)
+    plt.xlabel('Pearson correlation coefficient r')
+    plt.ylabel(r'Spearman rank correlation coefficient $\rho$')
+    plt.subplot(2, 2, 4)
+    plt.ylim(0, 0.25)
+    plt.xlim(0, 0.25)
+    plt.plot(b, d, 'x-')
+    plt.xlabel('p-value (Pearson)')
+    plt.ylabel('p-value (Spearman)')
+    plt.savefig(folder + '/livepoints_evolution.pdf')
+    plt.close()
+
+    #for i, (logVremaining, logLmin, us, ps) in enumerate(livepoint_sequence):
+    #    for j, (logVremaining2, logLmin2, us2, ps2) in enumerate(livepoint_sequence[i+1:]):
+    #        pass
+    #    # compare to n times previous live points: is the space changing or simply scaling?
+    return x, y, a, b, c, d
+    #return np.max(y), min(1, np.min(b) * len(b)), min(1, np.min(d) * len(d))
 
 def simplify_problem_name(problem_name):
     if problem_name.startswith('spikeslab'):
@@ -439,19 +576,10 @@ def get_cost(folder):
 
     # print("conclusion:", np.nanmedian(data))
     if len(data) == 0 and folder == 'systematiclogs/cmb-cosmology/ultranest-safe/':
-        return 1000 # about one per second, estimated from log file by eye
+        return 659  # about one per second, estimated from log file
 
     return np.nanmedian(data[-1000:])
 
-def compute_problem_width_orig(prob):
-    cumprob = prob.cumsum()
-    mask_lo = cumprob < 0.025 * prob.sum()
-    mask_hi = cumprob > 0.975 * prob.sum()
-
-    prob_lo = prob[mask_lo][-1]
-    prob_hi = prob[mask_hi][0]
-
-    return np.log10(prob_hi) - np.log10(prob_lo)
 
 def compute_gaussian_approximation_loss(eqsamples, prob, logL, problem_dimensionality):
     cov = np.cov(eqsamples, rowvar=0)
@@ -469,6 +597,7 @@ def compute_gaussian_approximation_loss(eqsamples, prob, logL, problem_dimension
     surprise = np.sum(prob * (logL - logL.max() - logLgauss))
 
     return np.abs(surprise) / problem_dimensionality
+
 
 def count_posterior_modes(problem_name, eqsamples, problem_dimensionality):
     """Count modes.
@@ -585,8 +714,7 @@ def trim_properties(problem_dimensionality,
     ]
 
 
-def evaluate_problem(problem_name, folder):
-    sequence, results, livepoint_sequence = getinfo(folder)
+def evaluate_problem(problem_name, folder, sequence, results, livepoint_sequence):
     
     u = results['weighted_samples']['upoints']
     w = results['weighted_samples']['weights']
@@ -602,7 +730,7 @@ def evaluate_problem(problem_name, folder):
     #problem_depth = min(15, info['H'] / problem_dimensionality)
     logvol, p, logl = logVcurve(sequence)
     problem_convexity, volmax, volmid, volmin = visualise_logVcurve(folder, problem_name, logvol, p, logl, results['logz'])
-
+    
     problem_depth = -volmid / np.log(10) / problem_dimensionality
     # problem_width = compute_problem_width(logvol, p, logl)
     problem_width = abs(volmax - volmin) / np.log(10) - np.log10(problem_dimensionality)
@@ -635,99 +763,7 @@ def evaluate_problem(problem_name, folder):
     ]
     return problem_properties, (logvol, p, logl)
 
-def main(filename):
-    #properties_names_short = ["ndim", "multimodality", "non-gaussianity", "asymmetry", "width", "depth"]
-    properties_names_short = ['dim', 'depth', 'width', 'modes', 'asym', '!gauss', 'phase']
-    properties_names = ["Dimensionality", "Depth", "Width", "Modes", "Inequality", "Non-Gaussianity", 'Transition']
-
-    bin_separators = [[9, 29], [2], [4], [2, 5], [5], [0.2], [0.02]]
-    bin_members = defaultdict(list)
-
-    fout = open('evaluateproblems.tex.tmp', 'w')
-    fout.write("""
-\\begin{tabular}{ll|%s}
-%-20s & %-20s & %s \\\\
-\\hline
-\\hline
-""" % (
-    'rr' + 'c' * (len(properties_names_short) - 1), "field", "name", 
-    ' & '.join(properties_names_short[:1] + ['cost'] + properties_names_short[1:])))
-    problem_names = []
-    properties_list = []
-    LVs = []
-    print('%-20s & %s' % ("name", '\t'.join(properties_names_short[:1] + ['cost'] + properties_names_short[1:])))
-    real_problems = set()
-    mock_problems = set()
-    last_field = ""
-
-    plt.rcParams['axes.prop_cycle'] = cycler('color', [
-        '#008fd5', '#fc4f30', '#e5ae38', '#6d904f', '#8b8b8b', '#810f7c', '#111111',
-        'tab:brown',
-        'tab:pink',
-        'tab:olive',
-        'tab:gray',
-        'tab:cyan',
-        'tab:blue',
-        'tab:orange',
-        'tab:green',
-        'tab:red',
-        'tab:purple',
-    ])
-    for line in open(filename):
-        if line.startswith('#'):
-            continue
-        print(line.rstrip())
-        field, problem_name_orig, folder = line.rstrip().split('\t')
-        #if field != 'mock': continue
-        problem_name = simplify_problem_name(problem_name_orig)
-        #if problem_name == 'spike+slab':
-        #    continue
-        cost = get_cost(folder)
-        assert os.path.exists("%s/info/results.json" % folder), folder
-        assert os.path.exists("%s/results/points.hdf5" % folder), folder
-        p_unsafe, logVcurve_data = evaluate_problem(problem_name, folder)
-        p = trim_properties(*p_unsafe)
-        if field != last_field and field in ('toy', 'mock'):
-            fout.write(r'\hline' + "\n")
-        #    fout.write(r'\multicolumn{9}{l}{%s} \\' % field)
-        #    fout.write("\n" + r'\hline' + "\n")
-        #    last_field = field
-        s = '%-20s & %-20s & %-3d & %-4d & %-4.2f & %-2.1f & %4d & %-3.2f & %-3.2f & %-2.3f' % tuple(
-            [field if field != last_field else '', problem_name_orig] + p_unsafe[:1] + [cost] + p_unsafe[1:])
-        
-        last_field = field
-        print(s)
-        fout.write(s + ' \\\\\n')
-        fout.flush()
-        problem_names.append(problem_name)
-        if field not in ('toy', 'mock'):
-            real_problems.add(problem_name)
-        elif field == 'mock':
-            mock_problems.add(problem_name)
-        
-        properties_list.append(p)
-
-        """
-        index = 0
-        for prop, seps in zip(p, bin_separators):
-            index_here = sum(prop >= s for s in seps)
-            # print(index_here, "from", prop, seps)
-            index *= (len(seps) + 1)
-            index += index_here
-            del seps
-
-        if len(bin_members[index]) > 0:
-            print("%s redundant with %s: index %d" % (folder, bin_members[index][0], index))
-        bin_members[index].append(folder)
-        del index
-        """
-
-        LVs.append((problem_name, logVcurve_data))
-    fout.write("""\end{tabular}
-""")
-    fout.close()
-    shutil.move('evaluateproblems.tex.tmp', 'evaluateproblems.tex')
-
+def missing_problems(bin_members, bin_separators, properties_names_short):
     print("analysing what types of problems are missing...")
     out = open('evaluate_missing.txt', 'w')
     for p in itertools.product(*[range(len(seps) + 1) for seps in bin_separators]):
@@ -744,14 +780,17 @@ def main(filename):
         out.write("%d: %10s\n" % (len(bin_members[index]), ' '.join(name)))
         del p
 
-    problem_names_unique = []
-    for p in problem_names:
-        if p not in problem_names_unique:
-            problem_names_unique.append(p)
+def deduplicate_list(a):
+    b = []
+    for p in a:
+        if p not in b:
+            b.append(p)
+    return b
+
+def plot_space(problem_names, properties_names, properties_list, colors, real_problems, mock_problems, bin_separators):
+    problem_names_unique = deduplicate_list(problem_names)
     properties = np.array(properties_list)
     nprops = properties.shape[1]
-
-    colors = {}
 
     print("plotting grid...")
     plt.figure(figsize=(20, 20))
@@ -831,6 +870,7 @@ def main(filename):
     plt.savefig("evaluateproblems.pdf", bbox_inches='tight')
     plt.close()
 
+def plot_volcurves(LVs, colors, real_problems, mock_problems):
     print("plotting volcurves")
     plt.figure(figsize=(10, 3.))
     used = {}
@@ -861,6 +901,135 @@ def main(filename):
     plt.ylabel('Posterior enclosed')
     plt.savefig("evaluateproblems_volcurve.pdf", bbox_inches='tight')
     plt.close()
+
+def main(filename):
+    #properties_names_short = ["ndim", "multimodality", "non-gaussianity", "asymmetry", "width", "depth"]
+    properties_names_short = ['dim', 'depth', 'width', 'modes', 'asym', '!gauss', 'phase']
+    properties_names = ["Dimensionality", "Depth", "Width", "Modes", "Inequality", "Non-Gaussianity", 'Transition']
+
+    bin_separators = [[9, 29], [2], [4], [2, 5], [5], [0.2], [0.02]]
+    bin_members = defaultdict(list)
+
+    fout = open('evaluateproblems.tex.tmp', 'w')
+    fout.write("""
+\\begin{tabular}{ll|%s}
+%-20s & %-20s & %s \\\\
+\\hline
+\\hline
+""" % (
+    'rr' + 'c' * (len(properties_names_short) - 1), "field", "name", 
+    ' & '.join(properties_names_short[:1] + ['cost'] + properties_names_short[1:])))
+    problem_names = []
+    properties_list = []
+    LVs = []
+    print('%-20s & %s' % ("name", '\t'.join(properties_names_short[:1] + ['cost'] + properties_names_short[1:])))
+    real_problems = set()
+    mock_problems = set()
+    last_field = ""
+
+    plt.rcParams['axes.prop_cycle'] = cycler('color', [
+        '#008fd5', '#fc4f30', '#e5ae38', '#6d904f', '#8b8b8b', '#810f7c', '#111111',
+        'tab:brown',
+        'tab:pink',
+        'tab:olive',
+        'tab:gray',
+        'tab:cyan',
+        'tab:blue',
+        'tab:orange',
+        'tab:green',
+        'tab:red',
+        'tab:purple',
+    ])
+    
+    livepoint_characteristics_sequences = []
+
+
+    for line in open(filename):
+        if line.startswith('#'):
+            continue
+        print(line.rstrip())
+        field, problem_name_orig, folder = line.rstrip().split('\t')
+        #if field != 'mock': continue
+        problem_name = simplify_problem_name(problem_name_orig)
+        #if problem_name == 'spike+slab':
+        #    continue
+        cost = get_cost(folder)
+        assert os.path.exists("%s/info/results.json" % folder), folder
+        assert os.path.exists("%s/results/points.hdf5" % folder), folder
+        sequence, results, livepoint_sequence = getinfo(folder)
+        livepoint_characteristics_sequences.append(visualise_restrictedprior_evolution(folder, problem_name, results, livepoint_sequence))
+        p_unsafe, logVcurve_data = evaluate_problem(problem_name, folder, sequence, results, livepoint_sequence)
+        p = trim_properties(*p_unsafe)
+        if field != last_field and field in ('toy', 'mock'):
+            fout.write(r'\hline' + "\n")
+        #    fout.write(r'\multicolumn{9}{l}{%s} \\' % field)
+        #    fout.write("\n" + r'\hline' + "\n")
+        #    last_field = field
+        s = '%-20s & %-20s & %-3d & %-4d & %-4.2f & %-2.1f & %4d & %-3.2f & %-3.2f & %-2.3f' % tuple(
+            [field if field != last_field else '', problem_name_orig] + p_unsafe[:1] + [cost] + p_unsafe[1:])
+        
+        last_field = field
+        print(s)
+        fout.write(s + ' \\\\\n')
+        fout.flush()
+        problem_names.append(problem_name)
+        if field not in ('toy', 'mock'):
+            real_problems.add(problem_name)
+        elif field == 'mock':
+            mock_problems.add(problem_name)
+        
+        properties_list.append(p)
+
+        """
+        index = 0
+        for prop, seps in zip(p, bin_separators):
+            index_here = sum(prop >= s for s in seps)
+            # print(index_here, "from", prop, seps)
+            index *= (len(seps) + 1)
+            index += index_here
+            del seps
+
+        if len(bin_members[index]) > 0:
+            print("%s redundant with %s: index %d" % (folder, bin_members[index][0], index))
+        bin_members[index].append(folder)
+        del index
+        """
+
+        LVs.append((problem_name, logVcurve_data))
+    fout.write("""\end{tabular}
+""")
+    fout.close()
+    shutil.move('evaluateproblems.tex.tmp', 'evaluateproblems.tex')
+
+    missing_problems(bin_members, bin_separators, properties_names_short)
+
+    colors = {}
+    plot_space(problem_names, properties_names, properties_list, colors, real_problems, mock_problems, bin_separators)
+
+    plot_volcurves(LVs, colors, real_problems, mock_problems)
+    
+    plt.figure(figsize=(6, 6))
+    used = {}
+    for problem_name, (x, y, a, b, c, d) in zip(problem_names, livepoint_characteristics_sequences):
+        color = colors[problem_name]
+        #mask_significant = np.logical_and(b < 0.01, d < 0.01)
+        plt.plot(a, c, 
+            '-' if problem_name in real_problems else ('--' if problem_name in mock_problems else ':'),
+            color=color,
+            label=None if problem_name in used else problem_name,
+            alpha=0.4 if problem_name == 'lennard-jones' else 1
+            #alpha=min(1.0, max(0.4, 1. / (1 + mask_significant.sum()**0.5)))
+        )
+        used[problem_name] = True
+
+    plt.xlabel('|Pearson correlation coefficient r|')
+    plt.ylabel(r'|Spearman rank correlation coefficient $\rho$|')
+    plt.xlim(0, 1)
+    plt.ylim(0, 1)
+    plt.legend(loc='lower right', ncol=3, bbox_to_anchor=(1.0, 0.9))
+    plt.savefig("evaluateproblems_spacestructure.pdf", bbox_inches='tight')
+    plt.close()
+        
 
 if __name__ == '__main__':
     main(sys.argv[1])

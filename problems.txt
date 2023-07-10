@@ -9,7 +9,7 @@ exoplanets	exo-rv-2	systematiclogs/exoplanet-rvs_0005.txt-2/ultranest-fast-fixed
 exoplanets	exo-rv-3	systematiclogs/exoplanet-rvs_0005.txt-3/ultranest-fast-fixed4d
 transients	slsn-LSQ12dlf	systematiclogs/mosfit-LSQ12dlf/ultranest/
 transients	magnetar-LSQ12dlf	systematiclogs/mosfit-LSQ12dlf-magnetar/ultranest/
-transients	grb-080916C	systematiclogs/grb-2/ultranest/
+#transients	grb-080916C	systematiclogs/grb-2/ultranest/
 extragalactic	agn-xray-spectrum	systematiclogs/xrayagnspec/ultranest-safe/
 extragalactic	powerlaw-relation	systematiclogs/line/ultranest-safe/
 extragalactic	sample-dist-gauss	systematiclogs/posteriorstacker/posteriorstacker-gauss/
