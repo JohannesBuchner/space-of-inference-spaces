@@ -97,14 +97,6 @@ A space of parameter spaces in the space sciences: parametric Bayesian inference
  in astronomy, cosmology and particle physics
 \end_layout
 
-\begin_layout Author
-Johannes Buchner
-\end_layout
-
-\begin_layout Date
-.
-\end_layout
-
 \begin_layout Abstract (unstructured)
 A sample of parametric Bayesian inference applications from astronomy, cosmology
  and particle physics is studied, augmented by mock data sets and toy problems.
@@ -125,6 +117,15 @@ ty, mono- to multi-modal, and a variety of complex distributions that range
  The collated sample of inference problems is proposed as a standard test
  bed for new samplers.
  For reproducibility and ease of use, a Docker compute image is provided.
+\end_layout
+
+\begin_layout Author
+Johannes Buchner
+\end_layout
+
+\begin_layout Address
+Max Planck Institute for Extraterrestrial Physics, Giessenbachstrasse, 85741
+ Garching, Germany
 \end_layout
 
 \begin_layout Keywords
