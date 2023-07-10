@@ -82,9 +82,9 @@ Build
 The code pipelines that support the various inference problems are extensive and
 complex.
 To allow a reproducible build that runs anywhere, a combination of conda and docker is used.
-The image/Dockerfile tells docker how to build an image (similar to a virtual machine) 
-that can be entered.
-To build the docker image, and install all the software in it.
+The image/Dockerfile tells docker how to build an image (similar to a virtual machine).
+To build the docker image, install all the software in it, and then enter the compute environment,
+follow these instructions.
 
 In the image/ folder, run::
 
@@ -157,5 +157,6 @@ Help is welcome! We need you!
 More information
 ----------------
 
+A `draft paper <https://github.com/JohannesBuchner/space-of-inference-spaces/blob/main/pres/problems2.pdf>`_ is in pres/
 
-A draft paper is in pres/
+For substantial contributions to the paper, co-authorship will be offered.
