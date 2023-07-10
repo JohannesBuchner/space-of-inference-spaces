@@ -87,7 +87,11 @@ The image/Dockerfile tells docker how to build an image (similar to a virtual ma
 To build the docker image, install all the software in it, and then enter the compute environment,
 follow these instructions.
 
-In the image/ folder, run::
+First you need to download two large data files.
+
+	$ make image/uxclumpy-cutoff-omni.fits image/uxclumpy-cutoff.fits
+
+Then, in the image/ folder, run::
 
 	$ docker build .
 

@@ -8,8 +8,10 @@ import gzip
 import shutil
 import matplotlib.pyplot as plt
 import h5py
+import tqdm
 from collections import defaultdict
-from getdist import MCSamples, plots
+import corner
+#from getdist import MCSamples, plots
 from ultranest.netiter import MultiCounter, PointPile, TreeNode, BreadthFirstIterator, combine_results
 from ultranest.mlfriends import AffineLayer, ScalingLayer, RobustEllipsoidRegion, bounding_ellipsoid
 import scipy.stats
@@ -362,28 +364,31 @@ def visualise_problem(folder, problem_name, info, eqsamples):
 
     default_i, default_j = 0, 1
     default_smooth_scale_2D = 1.1
-    if problem_name == 'testmultisine' and len(paramnames) > 3:
+    if problem_name == 'multisine' and len(paramnames) > 3:
         i, j = 2, 3
         smooth_scale_2D = default_smooth_scale_2D
     elif problem_name == 'asymgauss':
         i, j = 0, -1
         smooth_scale_2D = default_smooth_scale_2D
-    elif problem_name == 'xrayspectrum10' or problem_name == 'bixrayspectrum':
+    elif problem_name == 'compton-thick-AGN':
         i, j = 0, 2
         smooth_scale_2D = 2.0
-    elif problem_name == 'ligo':
+    elif problem_name == 'lennard-jones-6':
+        i, j = 4, 6
+        smooth_scale_2D = 3.0
+    elif problem_name == 'gravwave-ligo':
         i, j = default_i, default_j
         smooth_scale_2D = 3.0
-    elif problem_name == 'distbeta':
+    elif problem_name == 'beta':
         i, j = default_i, default_j
         smooth_scale_2D = 3.0
     elif problem_name.startswith('exo-rv') and len(paramnames) > 3:
         i, j = 0, 3
         smooth_scale_2D = default_smooth_scale_2D
-    elif problem_name == 'cosmology':
+    elif problem_name == 'cmb-planck':
         i, j = 1, 4
         smooth_scale_2D = 3.0
-    elif problem_name == 'rosen':
+    elif problem_name == 'rosenbrock':
         i, j = default_i, default_j
         smooth_scale_2D = 2.0
     else:
@@ -391,35 +396,32 @@ def visualise_problem(folder, problem_name, info, eqsamples):
         i, j = default_i, default_j
         smooth_scale_2D = default_smooth_scale_2D
 
-    samples_g = MCSamples(samples=transformed_samples,
-                          names=paramnames,
-                          label=problem_name,
-                          settings=dict(smooth_scale_2D=smooth_scale_2D),
-                          sampler='nested')
-
-    mcsamples = [samples_g]
-
+    levels = 1.0 - np.exp(-0.5 * np.arange(1.0, 4.1, 1.0) ** 2)
     try:
         plt.figure()
+        corner.corner(
+            transformed_samples, labels=paramnames,
+            show_titles=True, quiet=True, levels=levels,
+            plot_datapoints=False, plot_density=False, fill_contours=True, color='navy',
+        )
         plt.title(problem_name)
-        g = plots.get_subplot_plotter(width_inch=8)
-        g.settings.num_plot_contours = 3
-        g.triangle_plot(mcsamples, filled=False, contour_colors=plt.cm.Set1.colors)
         print("plotting to %s/simplified_posterior.pdf" % folder)
         plt.savefig(folder + '/simplified_posterior.pdf', bbox_inches='tight')
         plt.close()
-        del g
     except Exception as e:
         print(e)
 
-    #plt.figure(figsize=(3,4))
-    g = plots.get_single_plotter(width_inch=4, ratio=1)
+    plt.figure(figsize=(3,4))
+    corner.hist2d(
+        transformed_samples[:,i], transformed_samples[:,j], levels=levels,
+        plot_datapoints=True, plot_density=False, fill_contours=True, color='navy')
+    plt.gca().get_yaxis().get_major_formatter().set_useOffset(False)
+    plt.gca().get_xaxis().get_major_formatter().set_useOffset(False)
     plt.title(problem_name)
-    g.settings.num_plot_contours = 3
-    g.plot_2d(mcsamples, paramnames[i], paramnames[j], filled=False,
-        shaded=True, contour_colors=plt.cm.Set1.colors)
-    plt.xlim(transformed_samples[:,i].min(), transformed_samples[:,i].max())
-    plt.ylim(transformed_samples[:,j].min(), transformed_samples[:,j].max())
+    plt.xlabel(paramnames[i])
+    plt.ylabel(paramnames[j])
+    #plt.xlim(transformed_samples[:,i].min(), transformed_samples[:,i].max())
+    #plt.ylim(transformed_samples[:,j].min(), transformed_samples[:,j].max())
     #plt.scatter(transformed_samples[:,i], transformed_samples[:,j], marker='.')
     #plt.xlabel(paramnames[i])
     #plt.ylabel(paramnames[j])
@@ -445,9 +447,8 @@ def bounding_ellipsoid_logvolume(us):
     #f = np.einsum('ij,jk,ik->i', delta, a, delta).max()
     return region.estimate_volume()
 
-def visualise_restrictedprior_evolution(folder, problem_name, info, livepoint_sequence):
-
-    print("  %s/%s has %d live points snapshots" % (problem_name, folder, len(livepoint_sequence)))
+@mem.cache
+def compute_restrictedprior_evolution(folder, problem_name, info, livepoint_sequence):
     x = []
     y = []
     a = []
@@ -457,7 +458,7 @@ def visualise_restrictedprior_evolution(folder, problem_name, info, livepoint_se
     nlive, ndim = livepoint_sequence[0][2].shape
     
     # skip the last where the number of live points goes down
-    for i, (logVremaining, logLmin, us, ps) in enumerate(livepoint_sequence):
+    for i, (logVremaining, logLmin, us, ps) in enumerate(tqdm.tqdm(livepoint_sequence)):
         if len(us) < nlive // 2:
             continue
         # (1) space complexity:
@@ -497,11 +498,15 @@ def visualise_restrictedprior_evolution(folder, problem_name, info, livepoint_se
         c.append(rhomax)
         # apply bonferroni correction
         d.append(min(1, pvalmin * ntests))
+    return np.array(x), np.array(y), np.array(a), np.array(b), np.array(c), np.array(d)
 
+def visualise_restrictedprior_evolution(folder, problem_name, info, livepoint_sequence):
+    print("  %s/%s has %d live points snapshots" % (problem_name, folder, len(livepoint_sequence)))
+    nlive, ndim = livepoint_sequence[0][2].shape
+    x, y, a, b, c, d = compute_restrictedprior_evolution(folder, problem_name, info, livepoint_sequence)
     print("  %s/%s had %d live points usable snapshots" % (problem_name, folder, len(x)))
     
     print("plotting to %s/livepoints_evolution.pdf" % folder)
-    x, y, a, b, c, d = [np.array(r) for r in [x, y, a, b, c, d]]
     plt.figure(figsize=(8,8))
     plt.subplot(2, 2, 1)
     plt.suptitle(problem_name + '$_{%d}$' % ndim)
