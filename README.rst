@@ -136,7 +136,7 @@ To run real problems, see runreal.sh
 Some problems need to be run through their own interfaces,
 and modifications to those code bases were necessary to hook in the UltraNest sampler.
 The commands are documented in runreal.sh.
-These are currently: cosmology-CMB (montepython) and mosfit.
+These are currently: cosmology-CMB (montepython), mosfit, posteriorstacker, 3ML (crab.py, grb.py)
 
 TODO
 ----

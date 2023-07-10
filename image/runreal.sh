@@ -1,4 +1,4 @@
-export PYTHONPATH=../autoemcee/:../mininest/:../snowline/:../dynesty/ 
+#export PYTHONPATH=../autoemcee/:../mininest/:../snowline/:../dynesty/ 
 
 function runreal() {
 	# arg 1: sampler
@@ -24,15 +24,15 @@ function runreal() {
 
 for s in $*
 do
-	runreal $s bixrayspectrum-30 bixrayspectrum.py --contrast=30
-	runreal $s crab crab.py
-	runreal $s grb grb.py
+	runreal $s bixrayspectrum-30 bixrayspectrum.py --contrast=30  # via autosampler
+	runreal $s crab crab.py   # 3ML support a few samplers
+	runreal $s grb grb.py     # this is broken; 3ML support a few samplers
 	runreal $s transit exoplanet-transit.py
 	runreal $s exoplanet-rvs_0005.txt-0 "exoplanet.py --planets=0 --rvfile=exoplanet/rvs_0005.txt"
 	runreal $s exoplanet-rvs_0005.txt-1 "exoplanet.py --planets=1 --rvfile=exoplanet/rvs_0005.txt"
 	runreal $s exoplanet-rvs_0005.txt-2 "exoplanet.py --planets=2 --rvfile=exoplanet/rvs_0005.txt"
-	runreal $s ligo ligo.py
-	runreal $s icecube icecube.py
+	runreal $s ligo ligo.py   # PyCBC supports a few samplers
+	runreal $s icecube icecube.py  # via autosampler
 	
 done
 
