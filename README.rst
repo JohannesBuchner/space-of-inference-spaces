@@ -2,7 +2,9 @@
 Representative collection of inference problems in astronomy, cosmology and particle physics
 =============================================================================================
 
-A set of test problems for nested sampling which test:
+A `draft paper <https://github.com/JohannesBuchner/space-of-inference-spaces/blob/main/pres/problems2.pdf>`_ is in pres/
+
+This repository contains a set of inference problems for Bayesian inference samplers which test:
 
 * low & high dimensionality (2-100 parameters)
 * multi-modality (1-10 peaks)
@@ -11,37 +13,36 @@ A set of test problems for nested sampling which test:
 * heavy tails (not everything declines outwards like a gaussian)
 * depth (how small is the posterior compared to the prior tells how much information is in the data)
 
-
 A full list of problems is given in problems.txt, but they include:
 
 Physics
 -------
 
- * astroparticle pisa-icecube-neutrino
- * cosmology CMB-planck
- * gravitational waves	gravwave-ligo
- * supernova remnants	crab-gamma
- * exoplanets juliet-exo-transient systematiclogs/transit/ultranest-safe/
- * exoplanets juliet-exo-rv 0 planets systematiclogs/exoplanet-rvs_0005.txt-0/ultranest-safe
- * exoplanets juliet-exo-rv 1 planets systematiclogs/exoplanet-rvs_0005.txt-1/ultranest-safe
- * exoplanets juliet-exo-rv 2 planets systematiclogs/exoplanet-rvs_0005.txt-2/ultranest-fast-fixed4d
- * exoplanets juliet-exo-rv 3 planets systematiclogs/exoplanet-rvs_0005.txt-3/ultranest-fast-fixed4d
- * transients mosfit-SLSN-LSQ12dlf systematiclogs/mosfit-LSQ12dlf/ultranest-safe/
- * transients mosfit-magnetar-LSQ12dlf systematiclogs/mosfit-LSQ12dlf-magnetar/ultranest-safe/
- * supernova-remnants 3ML-crab systematiclogs/crab/ultranest/
- * extragalactic BXA-xray-agn-spec-fit-CDFS-179 systematiclogs/xrayagnspec/ultranest-safe/
- * materials Lennard-Jones potential with 6 particles systematiclogs/LJ6/
- * gravitational-waves ligo-GW: systematiclogs/ligo/ultranest-fast-fixed4d/
- * extragalactic line: systematiclogs/line/ultranest-safe/ 
- * extragalactic gaussdist: systematiclogs/posteriorstacker/posteriorstacker-flex11/ 
- * extragalactic histdist: systematiclogs/posteriorstacker/posteriorstacker-gauss/ 
+* astroparticle pisa-icecube-neutrino
+* cosmology CMB-planck
+* gravitational waves	gravwave-ligo
+* supernova remnants	crab-gamma
+* exoplanets juliet-exo-transient systematiclogs/transit/ultranest-safe/
+* exoplanets juliet-exo-rv 0 planets systematiclogs/exoplanet-rvs_0005.txt-0/ultranest-safe
+* exoplanets juliet-exo-rv 1 planets systematiclogs/exoplanet-rvs_0005.txt-1/ultranest-safe
+* exoplanets juliet-exo-rv 2 planets systematiclogs/exoplanet-rvs_0005.txt-2/ultranest-fast-fixed4d
+* exoplanets juliet-exo-rv 3 planets systematiclogs/exoplanet-rvs_0005.txt-3/ultranest-fast-fixed4d
+* transients mosfit-SLSN-LSQ12dlf systematiclogs/mosfit-LSQ12dlf/ultranest-safe/
+* transients mosfit-magnetar-LSQ12dlf systematiclogs/mosfit-LSQ12dlf-magnetar/ultranest-safe/
+* supernova-remnants 3ML-crab systematiclogs/crab/ultranest/
+* extragalactic BXA-xray-agn-spec-fit-CDFS-179 systematiclogs/xrayagnspec/ultranest-safe/
+* materials Lennard-Jones potential with 6 particles systematiclogs/LJ6/
+* gravitational-waves ligo-GW: systematiclogs/ligo/ultranest-fast-fixed4d/
+* extragalactic line: systematiclogs/line/ultranest-safe/ 
+* extragalactic gaussdist: systematiclogs/posteriorstacker/posteriorstacker-flex11/ 
+* extragalactic histdist: systematiclogs/posteriorstacker/posteriorstacker-gauss/ 
 
 
 Mock data
 ---------
 
- * Compton-thick-AGN systematiclogs/xrayspectrum40-0.01/ 
- * multisine-{0,1,2,3}comp
+* Compton-thick-AGN systematiclogs/xrayspectrum40-0.01/ 
+* multisine-{0,1,2,3}comp
 	systematiclogs/multisine-0comp-2d/ultranest-safe/
 	systematiclogs/multisine-1comp-5d/ultranest-safe/
 	systematiclogs/multisine-2comp-8d/ultranest-fast-fixed4d/
@@ -50,31 +51,31 @@ Mock data
 Toy 
 ---
 
- * asymgauss-4,16,100d
+* asymgauss-4,16,100d
 	systematiclogs/asymgauss-4d/ultranest-safe/
 	systematiclogs/asymgauss-100d/ultranest-fast-fixed4d/
 	systematiclogs/asymgauss-16d/ultranest-fast-fixed4d/
- * beta-2,10,30d
+* beta-2,10,30d
 	systematiclogs/beta-10d/ultranest-safe/
 	systematiclogs/beta-2d/ultranest-safe/
 	systematiclogs/beta-30d/ultranest-fast-fixed4d/
- * box-5d
+* box-5d
 	systematiclogs/box-5d/ultranest-safe/
- * eggbox-2d
+* eggbox-2d
 	systematiclogs/eggbox-2d/ultranest-safe/
- * loggamma-2,10,30d
+* loggamma-2,10,30d
 	systematiclogs/loggamma-10d/ultranest-safe/
 	systematiclogs/loggamma-2d/ultranest-safe/
 	systematiclogs/loggamma-30d/ultranest-fast-fixed4d/
- * rosenbrock-2,20,50d
+* rosenbrock-2,20,50d
 	systematiclogs/rosenbrock-2d/ultranest-safe/
 	systematiclogs/rosenbrock-20d/ultranest-safe/
 	systematiclogs/rosenbrock-50d/ultranest-fast-fixed4d/
- * corrfunnel4-2,10,50d
+* corrfunnel4-2,10,50d
 	systematiclogs/corrfunnel4-10d/ultranest-safe/
 	systematiclogs/corrfunnel4-2d/ultranest-safe/
 	systematiclogs/corrfunnel4-50d/ultranest-fast-fixed4d/
-
+* spike-and-slab
 
 Build
 ------
@@ -143,20 +144,30 @@ TODO
 
 Help is welcome! We need you!
 
-* If you run into any issues, please open a github issue!
-* Can you read the paper and provide feedback? Are there references missing, can the text be improved?
-* Can you provide ground truth results from fine integrations?
-* Maybe add your own sampler? Which problems can it run?
-* Can you add a deep learning emulator to accelerate the very slow likelihood of icecube?
-* Can we approximate nested sampling run outputs with a fast, analytic model, so that we have a very similar inference problem but know the truth? For example, approximate with a gaussian mixture model or a deep neural network that predicts the log-likelihood?
-* Can you help bring autosampler into montepython (or cobaya), 3ML, posteriorstacker so we have a uniform interface there as well?
+If you run into any issues, please open a github issue!
+
+Please read the paper draft and provide feedback? Are there references missing, can the text be improved?
+Can you suggest a journal that may be interested?
+
+If you have difficult inference problems:
 * Do you have additional toy problems that cover a new parameter space that should be added? 
   Ideally it should be motivated by some physics problem.
-* If you would like to help, but are unsure how, send me an email or open a github issue.
+* Can you provide ground truth results from fine integrations?
+
+If you develop software:
+* Maybe add your own sampler? Which problems can it run?
+* Can you help bring the uniform interface (autosampler.py) into forks of montepython, 3ML, mosfit or posteriorstacker
+  so we have a uniform interface for these as well?
+
+If you have machine learning experience:
+* Can you add a deep learning emulator to accelerate the very slow likelihood of icecube?
+* Can we approximate nested sampling run outputs with a fast, analytic model, so that we have a very similar inference problem but know the truth? For example, approximate with a gaussian mixture model or a deep neural network that predicts the log-likelihood?
+
+If you a like to help, but are unsure how, send me an email or open a github issue.
+
+For substantial contributions, co-authorship will be offered.
 
 More information
 ----------------
 
 A `draft paper <https://github.com/JohannesBuchner/space-of-inference-spaces/blob/main/pres/problems2.pdf>`_ is in pres/
-
-For substantial contributions to the paper, co-authorship will be offered.
