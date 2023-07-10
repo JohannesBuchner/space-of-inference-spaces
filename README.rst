@@ -146,9 +146,9 @@ Help is welcome! We need you!
 * If you run into any issues, please open a github issue!
 * Can you provide ground truth results from fine integrations?
 * Maybe add your own sampler? Which problems can it run?
-* Can you add a deep learning emulators that accelerate the very slow icecube likelihood?
+* Can you add a deep learning emulator to accelerate the very slow likelihood of icecube?
 * Can we approximate nested sampling run outputs with a fast, analytic model, so that we have a very similar inference problem but know the truth? For example, approximate with a gaussian mixture model or a deep neural network that predicts the log-likelihood?
-* Can you help bring ultranest into cobaya and montepython so we do not need custom code?
+* Can you help bring autosampler into montepython (or cobaya), 3ML, posteriorstacker so we have a uniform interface there as well?
 * Do you have additional toy problems that cover a new parameter space that should be added? 
   Ideally it should be motivated by some physics problem.
 * If you would like to help, but are unsure how, send me an email or open a github issue.
