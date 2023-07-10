@@ -1,6 +1,6 @@
-================================
-Problem set for Nested Sampling
-================================
+=============================================================================================
+Representative collection of inference problems in astronomy, cosmology and particle physics
+=============================================================================================
 
 A set of test problems for nested sampling which test:
 
