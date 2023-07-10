@@ -17,6 +17,7 @@ scipy.special.gammaln = mygammaln
 import scipy.stats
 
 def autoparamnames(ndim):
+    """Generate names for parameters."""
     return ['param%d' % (i+1) for i in range(ndim)]
 
 def null_transform(x):
@@ -24,6 +25,7 @@ def null_transform(x):
 
 
 def get_asymgauss(ndim):
+    """d-dimensional Gaussian with diverse standard deviations."""
     sigmamin = 10**(-10 + ndim**0.5/2)
     if ndim == 4:
         assert np.isclose(sigmamin, 1e-9), sigmamin
@@ -221,6 +223,7 @@ def get_stdfunnel4(ndim, gamma=0):
     return paramnames, loglike_vectorized, transform_vectorized, True, None
 
 def get_rosenbrock(ndim):
+    """Rosenbock's function problem, with -2 factor"""
     
     def loglike(theta):
         a = theta[:,:-1]
@@ -233,6 +236,7 @@ def get_rosenbrock(ndim):
     return autoparamnames(ndim), loglike, transform, True, None
 
 def get_halfrosenbrock(ndim):
+    """Rosenbock's function problem, with -1 factor"""
     
     def loglike(theta):
         a = theta[:,:-1]
@@ -245,6 +249,7 @@ def get_halfrosenbrock(ndim):
     return autoparamnames(ndim), loglike, transform, True, None
 
 def get_eggbox(ndim):
+    """Eggbox problem"""
     assert ndim == 2
     
     def loglike(z):
@@ -257,6 +262,7 @@ def get_eggbox(ndim):
     return ["a", "b"], loglike, transform, True, None
 
 def get_beta(ndim):
+    """Factorized beta distribution with random parameters."""
     rng = np.random.RandomState(ndim)
     a_values = 10**rng.uniform(-1, 1, size=ndim)
     b_values = 10**rng.uniform(-1, 1, size=ndim)
@@ -270,6 +276,7 @@ def get_beta(ndim):
     return autoparamnames(ndim), loglike, null_transform, True, (a_values, b_values)
 
 def get_loggamma(ndim):
+    """4-mode LogGamma problem, factorized with gaussians and loggamma distributions."""
     assert ndim >= 2
     rv1a = scipy.stats.loggamma(1, loc=2./3, scale=1./30)
     rv1b = scipy.stats.loggamma(1, loc=1./3, scale=1./30)
@@ -295,6 +302,7 @@ def get_loggamma(ndim):
     return autoparamnames(ndim), loglike, null_transform, True, ((rv1a, rv1b), (rv2a, rv2b), rv_rest)
 
 def get_multisine_nonvectorized(ncomponents, Ndata = 40, contrast = 100):
+    """Fit of a sinosoidal light curve with random measurement times."""
     rng = np.random.RandomState(2)
     jitter_true = 0.1
     phase_true = 0.
@@ -349,6 +357,7 @@ def get_multisine_nonvectorized(ncomponents, Ndata = 40, contrast = 100):
     return paramnames, loglike, null_transform, False, data
 
 def get_multisine(ncomponents, Ndata = 40, contrast = 100):
+    """Fit of a sinosoidal light curve with random measurement times."""
     rng = np.random.RandomState(2)
     jitter_true = 0.1
     phase_true = 0.
@@ -404,6 +413,7 @@ def get_multisine(ncomponents, Ndata = 40, contrast = 100):
     return paramnames, loglike, transform, True, data
 
 def get_box(ndim):
+    """High box on a Gaussian."""
     
     def loglike(theta):
         delta = np.max(theta, axis=1)
@@ -413,6 +423,34 @@ def get_box(ndim):
         return u
     
     return autoparamnames(ndim), loglike, transform, True, None
+
+
+def get_spike_and_slab(ndim, factor, offset=0, weight1=1):
+    """Mixture of two gaussians.
+
+    The narrower gaussian has standard deviation sigma2, and 
+    shifted by offset in each direction.
+    The wider gaussian has standard deviation sigma1=1.0.
+    """
+    sigma2 = 1.0 * factor**(-1. / ndim)
+    # print("factor:", factor, "sigma:", sigma2)
+    sigma1 = 1.0
+    assert sigma2 < sigma1, (sigma2, sigma1)
+    logconst1 = -np.log(weight1 / (1 + weight1)) - 0.5 * np.log(2 * np.pi * sigma1**2) * ndim
+    logconst2 = -np.log(1 / (1 + weight1)) - 0.5 * np.log(2 * np.pi * sigma2**2) * ndim
+
+    def loglike(theta):
+        logL1 = logconst1 - 0.5 * (((theta - offset * sigma1)**2).sum() / sigma1**2)
+        logL2 = logconst2 - 0.5 * (theta**2).sum() / sigma2**2
+        L = np.logaddexp(logL1, logL2)
+        if not L > -1e300:
+            return -1e300
+        return L
+
+    def transform(u):
+        return u * 20 - 10
+
+    return autoparamnames(ndim), loglike, transform, False, None
 
 
 problems = [
@@ -453,6 +491,30 @@ problems = [
     ('loggamma-10d', get_loggamma(10)),
     ('loggamma-30d', get_loggamma(30)),
     ('box-5d', get_box(5)),
+    ('spikeslab1-2d-4', get_spike_and_slab(2, 4)),
+    ('spikeslab1-2d-40', get_spike_and_slab(2, 40)),
+    ('spikeslab1-2d-400', get_spike_and_slab(2, 400)),
+    ('spikeslab1-2d-4000', get_spike_and_slab(2, 4000)),
+    ('spikeslab40-2d-4', get_spike_and_slab(2, 4, weight1=40)),
+    ('spikeslab40-2d-40', get_spike_and_slab(2, 40, weight1=40)),
+    ('spikeslab40-2d-400', get_spike_and_slab(2, 400, weight1=40)),
+    ('spikeslab40-2d-4000', get_spike_and_slab(2, 4000, weight1=40)),
+    ('spikeslab1000-2d-4', get_spike_and_slab(2, 4, weight1=1000)),
+    ('spikeslab1000-2d-40', get_spike_and_slab(2, 40, weight1=1000)),
+    ('spikeslab1000-2d-400', get_spike_and_slab(2, 400, weight1=1000)),
+    ('spikeslab1000-2d-4000', get_spike_and_slab(2, 4000, weight1=1000)),
+    ('spikeslab1000-2d-40-off1', get_spike_and_slab(2, 40, 1, weight1=1000)),
+    ('spikeslab1000-2d-40-off2', get_spike_and_slab(2, 40, 2, weight1=1000)),
+    ('spikeslab1000-2d-40-off4', get_spike_and_slab(2, 40, 4, weight1=1000)),
+    ('spikeslab1000-2d-40-off10', get_spike_and_slab(2, 40, 10, weight1=1000)),
+    ('spikeslab40-2d-40-off1', get_spike_and_slab(2, 40, 1, weight1=40)),
+    ('spikeslab40-2d-40-off2', get_spike_and_slab(2, 40, 2, weight1=40)),
+    ('spikeslab40-2d-40-off4', get_spike_and_slab(2, 40, 4, weight1=40)),
+    ('spikeslab40-2d-40-off10', get_spike_and_slab(2, 40, 10, weight1=40)),
+    ('spikeslab1-2d-40-off1', get_spike_and_slab(2, 40, 1)),
+    ('spikeslab1-2d-40-off2', get_spike_and_slab(2, 40, 2)),
+    ('spikeslab1-2d-40-off4', get_spike_and_slab(2, 40, 4)),
+    ('spikeslab1-2d-40-off10', get_spike_and_slab(2, 40, 10)),
 ]
 
 if __name__ == '__main__':
