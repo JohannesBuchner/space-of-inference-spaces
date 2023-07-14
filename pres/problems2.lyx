@@ -257,13 +257,15 @@ For each problem, the likelihood function
 \end_layout
 
 \begin_layout Section
-Method: A classification space for parametric inference
+Method: Characterization of parametric inference
 \end_layout
 
 \begin_layout Standard
 Various difficulties are encountered by different sub-disciplines.
  Here we specify six characteristics and give a mathematical definition
  for each.
+ Finally, we present a visual presentation which characterizes the posterior
+ degeneracies.
 \end_layout
 
 \begin_layout Subsection
@@ -563,7 +565,7 @@ The Bernstein–von Mises theorem states that when the data are highly informati
 \end_layout
 
 \begin_layout Standard
-The gaussianity of a posterior can be easily measured through the surprise
+The Gaussianity of a posterior can be easily measured through the surprise
  from a best-fitting multi-variate Gaussian to the posterior.
  We obtain a suitable gaussian from the mean and covariance of the posterior
  samples.
@@ -690,8 +692,569 @@ If all parameters have similar posterior uncertainties,
 .
 \end_layout
 
+\begin_layout Subsection
+Compact visualisation of posterior structure
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:Compact-visualisation-of"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+For a visual impression of the experienced parameter space and its linear
+ and non-linear degeneracies, a common tool are corner plots.
+ These are also known in the statistics literature as pairs plots, and an
+ example is shown in Figure
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:corner-example-1"
+
+\end_inset
+
+.
+ Here, we quantify the further interaction between pairs of parameters and
+ present a compact visualisation as a 
+\begin_inset Formula $d\times d$
+\end_inset
+
+ matrix.
+ The diagonal entries are filled with the information gain 
+\begin_inset Formula $H$
+\end_inset
+
+ expressed in bits.
+ The upper and lower triangles are populated with correlation coefficients
+ of pairs of parameters.
+\end_layout
+
+\begin_layout Standard
+Corner plots only consider the posterior distribution.
+ However, to express the experience of a sampler fairly, the characterization
+ should consider also the prior.
+ Here we work with the posterior samples expressed with coordinates on the
+ prior cumulative probability distribution (probability integral transform).
+ In the case of nested samplers working with prior transforms based on the
+ unit hyper-cube, this merely means we take the un-transformed posterior
+ samples.
+ First, we characterize the linear degeneracies.
+ the pair-wise Pearson correlation coefficient 
+\begin_inset Formula $\rho_{\mathrm{Pearson}}$
+\end_inset
+
+ is calculated for each posterior parameter pair.
+ Secondly, we characterize residual non-linear degeneracies.
+ We apply an affine transform which standardizes the parameter space to
+ be linearly independent, and then compute the pair-wise Spearman correlation
+ coefficient 
+\begin_inset Formula $\rho_{\mathrm{Spearman}}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The obtained matrix visualisation is demonstrated in Figure
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:degeneracy-viz-example"
+
+\end_inset
+
+, corresponding to the corner plot in Figure
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:corner-example-1"
+
+\end_inset
+
+.
+ The diagonal shows the parameter information gain, the lower triangle indicates
+ the linear degeneracies and the upper triangle indicates the non-linear
+ degeneracies.
+ In the case of a un-correlated gaussian, illustrated in the right panel
+ of Figure
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:degeneracy-viz-example"
+
+\end_inset
+
+, the off-diagonal elements are zero.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide true
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename /mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/exoplanet-rvs_0005.txt-1/ultranest-safe/simplified_posterior.pdf
+	width 100text%
+	BoundingBox 0bp 0bp 1120bp 1136bp
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:corner-example-1"
+
+\end_inset
+
+Corner plot 
+\begin_inset CommandInset citation
+LatexCommand citep
+before "created with corner.py;"
+key "Foreman-Mackey2016"
+literal "false"
+
+\end_inset
+
+ for the exo-rv problem with 1 planet.
+ The degeneracies can be non-linear (see e.g., ecc_p1 and K-p1).
+ Some parameters are uninformative (omega_p1), while others are very well
+ constrained.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename /mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/exoplanet-rvs_0005.txt-1/ultranest-safe/correlations.pdf
+	width 80col%
+	BoundingBox 0bp 0bp 294bp 297bp
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:degeneracy-viz-example"
+
+\end_inset
+
+Proposed visualisation of the degeneracies, corresponding to Figure
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:corner-example-1"
+
+\end_inset
+
+.
+ The lower left triangle in blue shows linear correlation between parameter
+ posteriors (
+\begin_inset Formula $|\rho_{\mathrm{Pearson}}|$
+\end_inset
+
+ from 0 to 1), with darker color indicating stronger correlation.
+ Similarly, the upper right traingle in orange shows Spearman rank correlation
+ between parameter posteriors, after removing the linear correlations.
+ The diagonal entries in green indicate the information gain on the parameter,
+ increasing from white to darker colors.
+ Here, some parameters are uninformative while others are highly informative.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename /mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/asymgauss-16d/ultranest-fast-fixed4d/correlations.pdf
+	width 80col%
+	BoundingBox 0bp 0bp 299bp 297bp
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Same as Figure
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:degeneracy-viz-example"
+
+\end_inset
+
+, but for our 16 dimensional Gaussian toy problem.
+ Here, the non-diagonal entries are near zero, indicating (correctly) that
+ there are no parameter degeneracies.
+ The diagonal elements vary, with the first parameter being much less informativ
+e than the others.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+wide true
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+input{../evaluateproblems.tex}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:List-of-problems"
+
+\end_inset
+
+List of problems analysed.
+ The columns describe (1) research field, (2) name, (3) dimensionality,
+ (4) model evaluation cost in milliseconds, (5) information gain, (6) tail
+ weight, (7) parameter inequality, (8) Gaussian approximation information
+ loss, (9) phase transition.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide true
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename /mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/evaluateproblems.pdf
+	width 100line%
+	BoundingBox 0bp 0bp 1045bp 1001bp
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Models"
+
+\end_inset
+
+Parameter space of the problems over the defined six characteristics.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Section
 Results
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide true
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename /mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/cmb-cosmology/ultranest-safe/correlations.pdf
+	width 50col%
+	BoundingBox 0bp 0bp 294bp 297bp
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename /mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/ligo/ultranest-fast-fixed4d/correlations.pdf
+	width 50col%
+	BoundingBox 0bp 0bp 294bp 297bp
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename /mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/icecube/ultranest-safe/correlations.pdf
+	width 50col%
+	BoundingBox 0bp 0bp 294bp 297bp
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename /mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/crab/ultranest/correlations.pdf
+	width 50col%
+	BoundingBox 0bp 0bp 294bp 297bp
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename /mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/transit/ultranest-safe/correlations.pdf
+	width 50col%
+	BoundingBox 0bp 0bp 294bp 297bp
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename /mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/exoplanet-rvs_0005.txt-2/ultranest-fast-fixed4d/correlations.pdf
+	width 50col%
+	BoundingBox 0bp 0bp 294bp 297bp
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename /mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/mosfit-LSQ12dlf/ultranest/correlations.pdf
+	width 50col%
+	BoundingBox 0bp 0bp 294bp 297bp
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename /mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/mosfit-LSQ12dlf-magnetar/ultranest/correlations.pdf
+	width 50col%
+	BoundingBox 0bp 0bp 294bp 297bp
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename /mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/xrayagnspec/ultranest-safe/correlations.pdf
+	width 50col%
+	BoundingBox 0bp 0bp 294bp 297bp
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename /mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/line/ultranest-safe/correlations.pdf
+	width 50col%
+	BoundingBox 0bp 0bp 294bp 297bp
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename /mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/posteriorstacker/posteriorstacker-gauss/correlations.pdf
+	width 50col%
+	BoundingBox 0bp 0bp 294bp 297bp
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename /mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/posteriorstacker/posteriorstacker-flex11/correlations.pdf
+	width 50col%
+	BoundingBox 0bp 0bp 294bp 297bp
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Posterior-structure-visualisatio"
+
+\end_inset
+
+Posterior structure visualisations (see section
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:Compact-visualisation-of"
+
+\end_inset
+
+) for our real physics inference problems.
+ The number of entries indicates the dimensionality, diagonal entries indicate
+ parameter information gain, the bottom left triangle entries indicate linear
+ parameter degeneracies and the upper right triangle indicates non-linear
+ degeneracies.
+ For example, the top left panel shows no non-linear degeneracy, while the
+ bottom left panel shows strong non-linear degeneracies.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename /mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/evaluateproblems_spacestructure.pdf
+	width 100col%
+	BoundingBox 0bp 0bp 391bp 442bp
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:corr"
+
+\end_inset
+
+For each problem, the evolution of the Pearson correlation coefficient (x-axis)
+ and the Spearman correlation coefficient as nested sampling raises the
+ likelihood threshold is shown as a curve.
+ Low coefficients (bottom left corner) indicate independent parameters,
+ high x-axis values indicate strong linear degeneracies.
+ High y-axis values indicate strong non-linear degeneracies, such as multiple
+ modes, or bananas in the parameter space.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -783,107 +1346,55 @@ reference "tab:List-of-problems"
 \end_layout
 
 \begin_layout Standard
-\begin_inset Float table
-wide true
-sideways false
-status open
-
-\begin_layout Plain Layout
-\align center
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-input{../evaluateproblems.tex}
-\end_layout
-
+Beyond those summary statistics, Figure
+\begin_inset space ~
 \end_inset
 
 
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-\begin_inset CommandInset label
-LatexCommand label
-name "tab:List-of-problems"
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Posterior-structure-visualisatio"
 
 \end_inset
 
-List of problems analysed.
- The columns describe (1) research field, (2) name, (3) dimensionality,
- (4) model evaluation cost in milliseconds, (5) information gain, (6) tail
- weight, (7) parameter inequality, (8) Gaussian approximation information
- loss, (9) phase transition.
-\end_layout
-
+ presents a visual impression of the posterior structure.
+ Based on the visualisation developed in section
+\begin_inset space ~
 \end_inset
 
 
-\end_layout
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:Compact-visualisation-of"
 
 \end_inset
 
-
+, this presents a diversity in dimensionality, as indicated by the number
+ of entries, the parameter information gain (diagonal entries), the linear
+ parameter degeneracies (bottom left triangles) and non-linear degeneracies
+ (upper right entries).
+ Some inference problems, such as cmb-planck (top left panel) show no non-linear
+ degeneracy, while others (agn-xray-spectrum, bottom left panel) show strong
+ non-linear degeneracies.
 \end_layout
 
 \begin_layout Standard
-\begin_inset Float figure
-wide true
-sideways false
-status open
-
-\begin_layout Plain Layout
-\begin_inset Graphics
-	filename /mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/evaluateproblems.pdf
-	width 100line%
-	BoundingBox 0bp 0bp 983bp 972bp
-
+Finally, we have a deeper look at the evolving likelihood surface as the
+ sampler moves from the prior to the posterior mass.
+ To this end, we observe the live point distribution at regular snapshots.
+ We apply the same procedure as in Figure
+\begin_inset space ~
 \end_inset
 
 
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:Models"
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:Compact-visualisation-of"
 
 \end_inset
 
-Parameter space of the problems over the defined six characteristics.
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-While the above summary statistics give an overview of the overall posterior,
- they do not completely capture the evolving likelihood surface as the sampler
- moves from the prior to the posterior mass (aka typical set).
- An additional insight can be obtained by observing the live point distribution
- at regular snapshots.
- Here, we compute the Pearson correlation coefficient of the live points
- using pair-wise axes, and record the largest coefficient.
- This encodes how strong linear degeneracies are.
- Then, we remove linear degeneracies with an affine whitening transform,
- and consider the Spearman rank coefficient using pair-wise axes, and again
- record the largest coefficient.
+ and note the largest Pearson and (linearly whitened) Spearman correlation
+ coefficient.
  Figure
 \begin_inset space ~
 \end_inset
@@ -902,52 +1413,6 @@ reference "fig:corr"
  Spearman) degeneracies over the parameter space.
  This behaviour is stronger for real problems (dashed and solid curves)
  than toy problems (dotted curves).
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-wide true
-sideways false
-status open
-
-\begin_layout Plain Layout
-\begin_inset Graphics
-	filename /mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/evaluateproblems_spacestructure.pdf
-	width 100line%
-	BoundingBox 0bp 0bp 983bp 972bp
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:corr"
-
-\end_inset
-
-For each problem, the evolution of the Pearson correlation coefficient (x-axis)
- and the Spearman correlation coefficient as nested sampling raises the
- likelihood threshold is shown as a curve.
- Low coefficients (bottom left corner) indicate independent parameters,
- high x-axis values indicate strong linear degeneracies.
- High y-axis values indicate strong non-linear degeneracies, such as multiple
- modes, or bananas in the parameter space.
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Section

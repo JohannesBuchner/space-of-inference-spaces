@@ -342,6 +342,36 @@ def visualise_logVcurve(folder, problem_name, logvol, p, logl, logz):
     plt.close()
     return (1 - np.exp(logz_simple - logz_convex)), volmax, volmid, volmin
 
+
+
+def visualise_posterior_structure(folder, problem_name, info, u, w, IG):
+    us = u[np.random.choice(len(w), p=w, size=100000), :]
+
+    pearson_rho, pearson_pval = pearsonr(us)
+    transform = AffineLayer()
+    transform.optimize(us, us)
+    whitened_us = transform.transform(us)
+    spearman_rho, spearman_pval = spearmanr(whitened_us)
+    print(pearson_rho, spearman_rho)
+    mask_triu = np.triu(np.ones_like(spearman_rho), 0) == 1
+    mask_tril = np.tril(np.ones_like(pearson_rho), 0) == 1
+    mask_diag = np.diag(np.ones_like(IG)) == 0
+    plt.figure()
+    plt.matshow(np.ma.masked_where(mask_triu, np.abs(pearson_rho)),
+        cmap='Blues', vmin=0, vmax=1, fignum=0)
+    plt.matshow(np.ma.masked_where(mask_tril, np.abs(spearman_rho)),
+        cmap='Oranges', vmin=0, vmax=1, fignum=0)
+    plt.matshow(np.ma.masked_where(mask_diag, np.diag(IG)),
+        cmap='Greens', fignum=0)
+    
+    plt.title(problem_name)
+    plt.subplots_adjust(hspace=0, wspace=0)
+    plt.savefig(folder + '/correlations.pdf')
+    plt.close()
+    print(folder + '/correlations.pdf')
+
+
+
 def visualise_problem(folder, problem_name, info, eqsamples):
     if os.path.exists(folder + '/simplified_posterior2d.pdf'):
         return
@@ -744,6 +774,7 @@ def evaluate_problem(problem_name, folder, sequence, results, livepoint_sequence
     logL = results['weighted_samples']['logl']
     # samples = results['weighted_samples']['points']
 
+    visualise_posterior_structure(folder, problem_name, results, u, w, IG)
 
     eqsamples = results['samples']
     visualise_problem(folder, problem_name, results, eqsamples)

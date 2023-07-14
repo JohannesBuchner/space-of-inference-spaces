@@ -357,6 +357,27 @@ def run_sampler(
                 show_titles=True)
             plt.savefig(log_dir + '/corner.pdf', bbox_inches='tight')
             plt.close()
+    elif samplername == 'vegas':
+        import vegas
+        integ = vegas.Integrator([[0, 1]] * len(param_names))
+        result = integ(lambda u: np.exp(flat_loglike(flat_transform(u))), nitn=10, neval=100000)
+        print(result.summary())
+        print('result = %s    Q = %.2f' % (result, result.Q))
+        print('lnZ:', np.log(result.mean))
+    elif samplername == 'lhsgrid':
+        import scipy.stats
+        sampler = scipy.stats.qmc.LatinHypercube(len(param_names))
+        usamples = sampler.random(n=40000000)
+        if vectorized:
+            psamples = transform(usamples)
+            L = loglike(psamples)
+            lnZ = np.log(np.exp(L - L.max()).mean()) + L.max()
+        info = dict(
+            ncall=len(usamples), 
+            maximum_likelihood=dict(L=float(L.max()), u=usamples[np.argmax(L)].tolist(), p=psamples[np.argmax(L)].tolist()),
+            logz=float(lnZ))
+        print(lnZ)
+        json.dump(info, open(log_dir + '/results.json', 'w'), indent=4)
     else:
         assert False, ("unknown sampler:", samplername)
 
