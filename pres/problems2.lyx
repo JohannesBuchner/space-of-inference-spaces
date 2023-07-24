@@ -312,7 +312,15 @@ Here we defined three common sub-groups: low-dimensional (
 \end_layout
 
 \begin_layout Subsection
-Information gain
+Information gain (
+\begin_inset Quotes eld
+\end_inset
+
+Depth
+\begin_inset Quotes erd
+\end_inset
+
+)
 \end_layout
 
 \begin_layout Standard
@@ -434,7 +442,7 @@ literal "false"
 \end_layout
 
 \begin_layout Subsection
-Multi-modality
+Modes
 \end_layout
 
 \begin_layout Standard
@@ -573,7 +581,15 @@ The Gaussianity of a posterior can be easily measured through the surprise
 \end_layout
 
 \begin_layout Subsection
-Tail weight
+Tail weight (
+\begin_inset Quotes eld
+\end_inset
+
+Width
+\begin_inset Quotes erd
+\end_inset
+
+)
 \end_layout
 
 \begin_layout Standard
@@ -636,7 +652,7 @@ In practice, the mapping of volume and likelihood, as well as the normalising
 \end_layout
 
 \begin_layout Subsection
-Parameter Inequality
+Inequality
 \end_layout
 
 \begin_layout Standard
@@ -683,10 +699,18 @@ Here, the information gain
 \begin_inset Formula $\theta_{i}$
 \end_inset
 
- is computed as: 
+ is computed from the prior 
+\begin_inset Formula $\pi(\theta_{i})$
+\end_inset
+
+ and posterior 
+\begin_inset Formula $P(\theta_{i}|D)$
+\end_inset
+
+ marginal distributions as: 
 \begin_inset Formula 
 \[
-\mathrm{IG}_{i}=\int\pi(\theta_{i})\log_{2}\frac{\pi(\theta_{i})}{P(\theta_{i})}d\theta_{i}
+\mathrm{IG}_{i}=\int\pi(\theta_{i})\log_{2}\frac{\pi(\theta_{i})}{P(\theta_{i}|D)}d\theta_{i}
 \]
 
 \end_inset
@@ -702,6 +726,146 @@ If all parameters have similar posterior uncertainties,
 
 .
  
+\end_layout
+
+\begin_layout Subsection
+Phase transitions
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename phasetransition.dia
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:phasetransition"
+
+\end_inset
+
+In the prior volume - likelihood plot of nested sampling, phase transitions
+ are visible as non-convexities.
+ The dashed curve illustrates our technique for closing the curve.
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Phase transitions are sudden, unexpected changes in volume when the likelihood
+ is changed continuously.
+ An example is shown in Figure
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:phasetransition"
+
+\end_inset
+
+.
+ This is common in multi-component fitting, where the rough overall data
+ is first approximated, and then fine tuning a second component onto a subset
+ of the data leads to a rapid further increase in the likelihood.
+ The situation has been likened in 
+\begin_inset CommandInset citation
+LatexCommand citet
+key "skilling2009nested"
+literal "false"
+
+\end_inset
+
+ to condensation of a water vapor into liquid water, where small temperature
+ changes leads to a sudden change in volume.
+ This can affect some inference techniques, because the relevant geometry
+ of the (proposal) space before and after the transition is radically different.
+ 
+\end_layout
+
+\begin_layout Standard
+We measure the presence and the impact of phase transitions.
+ 
+\begin_inset CommandInset citation
+LatexCommand citet
+key "skilling2009nested"
+literal "false"
+
+\end_inset
+
+ discussed that the slope of the likelihood-volume curve deviates strongly
+ from a powerlaw with index -1.
+ Figure
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:phasetransition"
+
+\end_inset
+
+ illustrates a phase transition in blue, with a wide plateau followed by
+ a spike of small volume.
+ Here, we use an extrapolating powerlaw (purple in Figure
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:phasetransition"
+
+\end_inset
+
+) with index -1 to raise all points to the right of the curve.
+ From both the modified curve and the original curve, we compute the evidence,
+ and consider the ratio as our phase transition indicator:
+\begin_inset Formula 
+\[
+P=\frac{\int L'(V)\,dV}{\int L(V)\,dV}
+\]
+
+\end_inset
+
+Here the denominator with 
+\begin_inset Formula $L$
+\end_inset
+
+ is the normal nested sampling computation of the evidence, while the numerator
+ contains the modified curve, 
+\begin_inset Formula $L'$
+\end_inset
+
+, as described above.
 \end_layout
 
 \begin_layout Subsection
@@ -1310,12 +1474,13 @@ real
 \end_layout
 
 \begin_layout Standard
-The exoplanet radial velocity fitting with one planet appears to show a
- phase transition, and heavy-tailed posteriors.
- These properties are also produced by the spike and slab toy problem variations.
+The exoplanet radial velocity fitting with one planet shows a phase transition,
+ and heavy-tailed posteriors.
+ These properties are also produced by the spike and slab toy problem variations
+, calculated here in only two dimensions.
  Fitting for 3 exoplanets yield 9 modes, and the LSQ12dlf analyses show
  a similar number of modes.
- The multisine mock problem mimicks the properties of the exoplanet radial
+ The multisine mock problem mimics the properties of the exoplanet radial
  velocity fitting in terms of multi-modality, width, parameter asymmetry,
  phase transition and heavy-tailed posteriors, suggesting it is a useful
  approximation.
@@ -1334,15 +1499,7 @@ reference "fig:volcurve"
 \end_inset
 
 , the information gain differs substantially.
- Additionally, the 
-\begin_inset Quotes eld
-\end_inset
-
-asym
-\begin_inset Quotes erd
-\end_inset
-
- column of Table
+ Additionally, the asymmetry column of Table
 \begin_inset space ~
 \end_inset
 
