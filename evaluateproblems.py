@@ -941,7 +941,7 @@ def plot_volcurves(LVs, colors, real_problems, mock_problems):
 def main(filename):
     #properties_names_short = ["ndim", "multimodality", "non-gaussianity", "asymmetry", "width", "depth"]
     properties_names_short = ['dim', 'depth', 'width', 'modes', 'asym', '!gauss', 'phase']
-    properties_names = ["Dimensionality", "Depth", "Width", "Modes", "Inequality", "Non-Gaussianity", 'Transition']
+    properties_names = ["Dimensionality", "Depth", "Width", "Modes", "Inequality", "Non-Gaussianity", 'Phase Transition']
 
     bin_separators = [[9, 29], [2], [4], [2, 5], [5], [0.2], [0.02]]
     bin_members = defaultdict(list)

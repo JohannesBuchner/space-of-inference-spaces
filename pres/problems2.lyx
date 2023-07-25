@@ -741,6 +741,7 @@ status open
 \begin_layout Plain Layout
 \begin_inset Graphics
 	filename phasetransition.dia
+	width 100col%
 
 \end_inset
 
