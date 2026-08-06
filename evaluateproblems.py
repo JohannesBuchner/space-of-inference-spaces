@@ -288,6 +288,80 @@ def spearmanr(a):
     else:
         return r, p
 
+def _linear_residual(y, x):
+    """
+    Residuals of y after linear regression on x: y ~ a + b x.
+    Returns r = y - (a + b x).
+    """
+    X = np.column_stack([x, np.ones_like(x)])
+    coef, *_ = np.linalg.lstsq(X, y, rcond=None)
+    return y - X @ coef
+
+def _safe_spearman(x, y):
+    """
+    Spearman correlation with basic NaN handling for constant arrays.
+    """
+    r, p = scipy.stats.spearmanr(x, y)
+    if not np.isfinite(r):  # e.g., one of x,y is constant
+        r, p = 0.0, 1.0
+    return r, p
+
+@mem.cache
+def spearman_after_linear_removal(
+    a,
+    rho_mode,
+    p_mode,
+):
+    """
+    For each pair (i,j), compute Spearman correlation after removing linear trends
+    in both directions:
+      - regress a[:, j] on a[:, i], get residual r_y|x, compute Spearman(a[:, i], r_y|x)
+      - regress a[:, i] on a[:, j], get residual r_x|y, compute Spearman(a[:, j], r_x|y)
+    Then symmetrize by aggregating the two ρ's using rho_mode and the two p-values using p_mode.
+    Returns symmetric matrices rho, pval of shape (d, d).
+    """
+    a = np.asarray(a)
+    N, d = a.shape
+    rho = np.zeros((d, d), dtype=float)
+    pval = np.zeros((d, d), dtype=float)
+
+    # Diagonal entries: no residual dependence with itself
+    np.fill_diagonal(rho, 0.0)
+    np.fill_diagonal(pval, 0.0)
+
+    # Aggregators
+    def agg(vals, mode):
+        if mode == 'mean':
+            return 0.5 * (vals[0] + vals[1])
+        elif mode == 'min':
+            return np.minimum(vals[0], vals[1])
+        elif mode == 'max':
+            return np.maximum(vals[0], vals[1])
+        else:
+            raise ValueError(f"Unknown mode: {mode}")
+
+    for i in range(d):
+        xi = a[:, i]
+        for j in range(i+1, d):
+            yj = a[:, j]
+
+            # Direction 1: Y on X
+            ry_given_x = _linear_residual(yj, xi)
+            r1, p1 = _safe_spearman(xi, ry_given_x)
+
+            # Direction 2: X on Y
+            rx_given_y = _linear_residual(xi, yj)
+            r2, p2 = _safe_spearman(yj, rx_given_y)
+
+            r_sym = agg((r1, r2), rho_mode)
+            p_sym = agg((p1, p2), p_mode)
+
+            rho[i, j] = rho[j, i] = r_sym
+            pval[i, j] = pval[j, i] = p_sym
+
+    return rho, pval
+
+
 @mem.cache
 def convex_completion(x, y):
     assert len(x) == len(y), (len(x), len(y))
@@ -343,27 +417,41 @@ def visualise_logVcurve(folder, problem_name, logvol, p, logl, logz):
     return (1 - np.exp(logz_simple - logz_convex)), volmax, volmid, volmin
 
 
-
 def visualise_posterior_structure(folder, problem_name, info, u, w, IG):
+    d = len(IG)
     us = u[np.random.choice(len(w), p=w, size=100000), :]
 
     pearson_rho, pearson_pval = pearsonr(us)
-    transform = AffineLayer()
-    transform.optimize(us, us)
-    whitened_us = transform.transform(us)
-    spearman_rho, spearman_pval = spearmanr(whitened_us)
+    #spearman_rho, spearman_pval = spearmanr(us)
+    spearman_rho, spearman_pval = spearman_after_linear_removal(us, 'min', 'max')
+    #transform = AffineLayer()
+    #transform.optimize(us, us)
+    #whitened_us = transform.transform(us)
+    #spearman_rho, spearman_pval = spearmanr(whitened_us)
     print(pearson_rho, spearman_rho)
     mask_triu = np.triu(np.ones_like(spearman_rho), 0) == 1
     mask_tril = np.tril(np.ones_like(pearson_rho), 0) == 1
     mask_diag = np.diag(np.ones_like(IG)) == 0
     plt.figure()
+    ax = plt.gca()
     plt.matshow(np.ma.masked_where(mask_triu, np.abs(pearson_rho)),
         cmap='Blues', vmin=0, vmax=1, fignum=0)
     plt.matshow(np.ma.masked_where(mask_tril, np.abs(spearman_rho)),
         cmap='Oranges', vmin=0, vmax=1, fignum=0)
     plt.matshow(np.ma.masked_where(mask_diag, np.diag(IG)),
         cmap='Greens', fignum=0)
-    
+
+    for i in range(d):
+        for j in range(d):
+            if i == j:
+                ax.text(j, i, f"{IG[i]:.0f}", ha='center', va='center')
+            elif i > j and abs(pearson_rho[i, j]) > 0.05:
+                ax.text(j, i, f"{pearson_rho[i, j]:.1f}".replace('0.', '.'),
+                    ha='center', va='center')
+            elif i < j and abs(spearman_rho[i, j]) > 0.05:
+                ax.text(j, i, f"{spearman_rho[i, j]:.1f}".replace('0.', '.'),
+                    ha='center', va='center')
+
     plt.title(problem_name)
     plt.subplots_adjust(hspace=0, wspace=0)
     plt.savefig(folder + '/correlations.pdf')
@@ -1032,7 +1120,7 @@ def main(filename):
         """
 
         LVs.append((problem_name, logVcurve_data))
-    fout.write("""\end{tabular}
+    fout.write(r"""\end{tabular}
 """)
     fout.close()
     shutil.move('evaluateproblems.tex.tmp', 'evaluateproblems.tex')

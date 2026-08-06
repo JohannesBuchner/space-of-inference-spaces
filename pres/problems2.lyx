@@ -1,5 +1,5 @@
-#LyX 2.3 created this file. For more info see http://www.lyx.org/
-\lyxformat 544
+#LyX 2.4 created this file. For more info see https://www.lyx.org/
+\lyxformat 620
 \begin_document
 \begin_header
 \save_transient_properties true
@@ -8,13 +8,13 @@
 \begin_preamble
 \titlerunning{A space of parameter spaces in the space sciences}
 \end_preamble
-\options twocolumn
-\use_default_options true
-\maintain_unincluded_children false
+\options twocolumn,latin9
+\use_default_options false
+\maintain_unincluded_children no
 \language british
 \language_package default
-\inputencoding auto
-\fontencoding global
+\inputencoding auto-legacy
+\fontencoding auto
 \font_roman "default" "default"
 \font_sans "default" "default"
 \font_typewriter "default" "default"
@@ -22,7 +22,9 @@
 \font_default_family default
 \use_non_tex_fonts false
 \font_sc false
-\font_osf false
+\font_roman_osf false
+\font_sans_osf false
+\font_typewriter_osf false
 \font_sf_scale 100 100
 \font_tt_scale 100 100
 \use_microtype false
@@ -45,7 +47,7 @@
 \pdf_backref false
 \pdf_pdfusetitle true
 \pdf_quoted_options "unicode=true"
-\papersize a4paper
+\papersize a4
 \use_geometry false
 \use_package amsmath 2
 \use_package amssymb 1
@@ -66,7 +68,9 @@
 \suppress_date false
 \justification true
 \use_refstyle 1
+\use_formatted_ref 0
 \use_minted 0
+\use_lineno 0
 \index Index
 \shortcut idx
 \color #008000
@@ -83,40 +87,53 @@
 \papercolumns 1
 \papersides 1
 \paperpagestyle default
+\tablestyle default
 \tracking_changes false
 \output_changes false
+\change_bars false
+\postpone_fragile_content false
 \html_math_output 0
 \html_css_as_file 0
 \html_be_strict false
+\docbook_table_output 0
+\docbook_mathml_prefix 1
 \end_header
 
 \begin_body
 
 \begin_layout Title
-A space of parameter spaces in the space sciences: parametric Bayesian inference
- in astronomy, cosmology and particle physics
+A space of parameter spaces in the space sciences
+\end_layout
+
+\begin_layout Subtitle
+Parametric Bayesian inference in astronomy,
+ cosmology and particle physics
 \end_layout
 
 \begin_layout Abstract (unstructured)
-A sample of parametric Bayesian inference applications from astronomy, cosmology
- and particle physics is studied, augmented by mock data sets and toy problems.
- The parameter spaces and posterior distributions are characterized by (1)
- the number of model parameters, (2) whether the posterior shape is similar
- to a gaussian, (3) whether the posterior has light or heavy tails, (4)
- how small the posterior is compared to the prior, i.e., how informative the
- data are, (5) whether some parameters remain unconstrained while others
- are highly constrained, (6) whether the posterior has multiple, disconnected
- modes.
+A sample of parametric Bayesian inference applications from astronomy,
+ cosmology and particle physics is studied,
+ augmented by mock data sets and toy problems.
+ The parameter spaces and posterior distributions are characterized by (1) the number of model parameters,
+ (2) whether the posterior shape is similar to a Gaussian,
+ (3) whether the posterior has light or heavy tails,
+ (4) how small the posterior is compared to the prior,
+ i.e.,
+ how informative the data are,
+ (5) whether some parameters remain unconstrained while others are highly constrained,
+ (6) whether the posterior has multiple,
+ disconnected modes,
+ and (7) whether the inference undergoes phase transitions.
  These axis define a parameter space of inference problems.
- We characterize each of the inference problems and observe that inference
- in astrophysics spans the entire parameter space, from low to high dimensionali
-ty, mono- to multi-modal, and a variety of complex distributions that range
- from uninformative to highly informative.
- Furthermore, the computational cost of the physical models can range from
- milliseconds to dozens of seconds.
- The collated sample of inference problems is proposed as a standard test
- bed for new samplers.
- For reproducibility and ease of use, a Docker compute image is provided.
+ We characterize each of the inference problems and observe that inference in astrophysics spans the entire parameter space,
+ from low to high dimensionality,
+ mono- to multi-modal,
+ and a variety of complex distributions that range from uninformative to highly informative.
+ Furthermore,
+ the computational cost of the physical models can range from milliseconds to dozens of seconds.
+ The collated sample of inference problems is proposed as a standard test bed for new samplers.
+ For reproducibility and ease of use,
+ a Docker compute image is provided.
 \end_layout
 
 \begin_layout Author
@@ -124,12 +141,16 @@ Johannes Buchner
 \end_layout
 
 \begin_layout Address
-Max Planck Institute for Extraterrestrial Physics, Giessenbachstrasse, 85741
- Garching, Germany
+Max Planck Institute for Extraterrestrial Physics,
+ Giessenbachstrasse,
+ 85748 Garching,
+ Germany
 \end_layout
 
 \begin_layout Keywords
-Bayesian inference; parametric models; astrophysics
+Bayesian inference;
+ parametric models;
+ astrophysics
 \end_layout
 
 \begin_layout Section
@@ -137,69 +158,65 @@ Introduction
 \end_layout
 
 \begin_layout Standard
-Fitting parametric models to experimental data is one of the key methods
- to infer physical parameters.
- In physics, investigation of distant processes is possible by modelling
- the measurement process accurately.
- Here, we focus on problems where the model has continuous parameters with
- predefined prior ranges, and where a likelihood function has been defined
- to compare the model prediction to data.
- Some examples include fitting the power spectrum of the Cosmic Microwave
- Background (CMB) with Dark Energy and Cold Dark Matter (
-\begin_inset Formula $\lambda$
+Fitting parametric models to experimental data is one of the key methods to infer physical parameters.
+ In physics,
+ investigation of distant processes is possible by modelling the measurement process accurately.
+ Here,
+ we focus on problems where the model has continuous parameters with predefined prior ranges,
+ and where a likelihood function has been defined to compare the model prediction to data.
+ Some examples include fitting the power spectrum of the Cosmic Microwave Background (CMB) with Dark Energy and Cold Dark Matter (
+\begin_inset Formula $\Lambda$
 \end_inset
 
-CDM) cosmologies, fitting time series of the radial velocity of a host star
- gravitationally pulled by its exoplanets, dissecting multiple components
- in spectra and population inference from uncertain measurements of many
- individual objects, such as luminosity or mass functions.
- The plausible ranges of model parameters that match the data are typically
- tested in a Bayesian framework once prior and likelihood are specified
- with Monte Carlo samplers.
+CDM) cosmologies,
+ fitting time series of the radial velocity of a host star gravitationally pulled by its exoplanets,
+ dissecting multiple components in spectra and population inference from uncertain measurements of many individual objects,
+ such as luminosity or mass functions.
+ The plausible ranges of model parameters that match the data are typically tested in a Bayesian framework once prior and likelihood are specified with Monte Carlo samplers.
 \end_layout
 
 \begin_layout Standard
-Monte Carlo sampling methods of varying complexity have been developed over
- the last decades.
- This includes variations of Markov Chain Monte Carlo (MCMC), Particle Monte
- Carlo (PMC), Importance Samplers (IS) and Nested Samplers (NS).
- Specific implementations specify the initialisation, exploration strategy
- (e.g., proposal function) and termination criterion.
+Monte Carlo sampling methods of varying complexity have been developed over the last decades.
+ This includes variations of Markov Chain Monte Carlo (MCMC),
+ Sequential Monte Carlo (SMC),
+ importance samplers (IS) and nested sampling (NS).
+ Specific implementations specify the initialisation,
+ exploration strategy (e.g.,
+ proposal function) and termination criterion.
  These are often tuned for the application.
- Reliable parameter recovery of a method can be tested by Monte Carlo simulating
- new datasets, and analysing them.
- An alternative are toy inference problems that approximate features of
- the real problem.
+ Reliable parameter recovery of a method can be tested by Monte Carlo simulating new datasets,
+ and analysing them.
+ An alternative is to use toy inference problems that approximate features of the real problem.
  These can be more easily understood and more rapidly analysed.
- Given the diversity of algorithms and inference problems, it is interesting
- to consider whether a different algorithm can perform well on the same
- problem, and whether the currently used algorithm can be transferred to
- another problem.
- This work is focusing on the applicability of Monte Carlo Samplers over
- different types of inference problems.
+ Given the diversity of algorithms and inference problems,
+ it is interesting to consider whether a different algorithm can perform well on the same problem,
+ and whether the currently used algorithm can be transferred to another problem.
+ This work is focusing on the applicability of Monte Carlo Samplers over different types of inference problems.
 \end_layout
 
 \begin_layout Standard
-Inference problems differ substantially by the posterior distribution that
- a Monte Carlo sampler has to explore.
- The main characteristics of problems include (1) the number of model parameters
-, (2) whether the posterior shape is similar to a gaussian, (3) whether
- the posterior has light or heavy tails, (4) how small the posterior is
- compared to the prior (i.e., how informative the data are), (5) whether some
- parameters remain unconstrained while others are highly constrained, (6)
- whether the posterior has multiple, disconnected peaks.
- Besides a systematic classification of inference problems based on five
- characteristics, this work presents a diverse set of real and toy inference
- problems that cover the entire classification space.
+Inference problems differ substantially by the posterior distribution that a Monte Carlo sampler has to explore.
+ The main characteristics of problems include (1) the number of model parameters,
+ (2) whether the posterior shape is similar to a Gaussian,
+ (3) whether the posterior has light or heavy tails,
+ (4) how small the posterior is compared to the prior (i.e.,
+ how informative the data are),
+ (5) whether some parameters remain unconstrained while others are highly constrained,
+ (6) whether the posterior has multiple,
+ disconnected peaks,
+ and (7) whether the inference undergoes phase transitions.
+ Besides a systematic classification of inference problems based on the seven characteristics,
+ this work presents a diverse set of real and toy inference problems that cover the entire classification space.
 \end_layout
 
 \begin_layout Section
-Data: collated inference problems
+Data:
+ collated inference problems
 \end_layout
 
 \begin_layout Standard
-To cover most of the problem space, we collected inference problems published
- in the literature and available in open-source physics packages.
+To cover most of the problem space,
+ we collected inference problems published in the literature and available in open-source physics packages.
  Appendix
 \begin_inset space ~
 \end_inset
@@ -208,12 +225,13 @@ To cover most of the problem space, we collected inference problems published
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "subsec:Real-problems"
+nolink "false"
 
 \end_inset
 
- introduces real-world problems, which form the main sample in this work.
- Simplified mock problems with generated data sets that approximate real-world
- problems are presented in Appendix
+ introduces real-world problems,
+ which form the main sample in this work.
+ Simplified mock problems with generated data sets that approximate real-world problems are presented in Appendix
 \begin_inset space ~
 \end_inset
 
@@ -224,6 +242,7 @@ reference "sec:Mock-problems"
 plural "false"
 caps "false"
 noprefix "false"
+nolink "false"
 
 \end_inset
 
@@ -236,6 +255,7 @@ noprefix "false"
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "subsec:Toy-problems"
+nolink "false"
 
 \end_inset
 
@@ -244,7 +264,8 @@ reference "subsec:Toy-problems"
 \end_layout
 
 \begin_layout Standard
-For each problem, the likelihood function 
+For each problem,
+ the likelihood function 
 \begin_inset Formula $L(\theta)$
 \end_inset
 
@@ -257,15 +278,15 @@ For each problem, the likelihood function
 \end_layout
 
 \begin_layout Section
-Method: Characterization of parametric inference
+Method:
+ Characterization of parametric inference
 \end_layout
 
 \begin_layout Standard
 Various difficulties are encountered by different sub-disciplines.
- Here we specify six characteristics and give a mathematical definition
- for each.
- Finally, we present a visual presentation which characterizes the posterior
- degeneracies.
+ Here we specify six characteristics and give a mathematical definition for each.
+ Finally,
+ we present a visual presentation which characterizes the posterior degeneracies.
 \end_layout
 
 \begin_layout Subsection
@@ -273,42 +294,40 @@ Dimensionality
 \end_layout
 
 \begin_layout Standard
-In astrophysics, fitting problem dimensionalities range from 1 to millions
- parameters.
- Examples of extremely high-dimensional problems include pixel reconstructions
- (e.g., ) and .
- With more parameters, the possible combinations of parameter values rises
- exponentially (the curse of dimensionality).
- This makes the problem complex to explore and distances between parameter
- space points meaningless.
+In astrophysics,
+ fitting problem dimensionalities range from 1 to millions parameters.
+ Examples of extremely high-dimensional problems include non-parametric morphological (image) analyses,
+ and hierarchical Bayesian models with large number of calibration nuisance parameters.
+ With more parameters,
+ the possible combinations of parameter values rise exponentially (the curse of dimensionality).
+ This makes the problem complex to explore and distances between parameter space points become less informative.
  
 \end_layout
 
 \begin_layout Standard
-Here we defined three common sub-groups: low-dimensional (
+Here we define three common sub-groups:
+ low-dimensional (
 \begin_inset Formula $d=2-9$
 \end_inset
 
-), mid-dimensional (
+),
+ mid-dimensional (
 \begin_inset Formula $d=10-29$
 \end_inset
 
-) and high-dimension (
+) and high-dimensional (
 \begin_inset Formula $d\geq30$
 \end_inset
 
 ).
- The boundaries are set near where simple and more sophisticated ideas of
- geometric sampling start failing.
+ The boundaries are set near where simple and more sophisticated ideas of geometric sampling start failing.
  Extremely high dimensions (
 \begin_inset Formula $d\gg100$
 \end_inset
 
 ) are not the focus of this work.
- We note that these virtually always require the derivatives of likelihood
- functions to effectively navigate the parameter space.
- The availability of likelihood derivatives could be considered an additional
- classification category.
+ We note that these virtually always require the derivatives of likelihood functions to effectively navigate the parameter space.
+ The availability of likelihood derivatives could be considered an additional classification category.
 \end_layout
 
 \begin_layout Subsection
@@ -324,21 +343,24 @@ Depth
 \end_layout
 
 \begin_layout Standard
-Depending on the data quality of the experiment, the posterior may be a
- tiny region of the prior, or be identical with the prior.
- This can be quantified by the Kullback-Leibler divergence, or surprise,
+Depending on the data quality of the experiment,
+ the posterior may be a tiny region of the prior,
+ or be identical with the prior.
+ This can be quantified by the Kullback-Leibler divergence,
+ or surprise,
  between the two probability distributions:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula 
 \[
-D_{\mathrm{KL}}=\int\pi(\theta)\ln\frac{\pi(\theta)}{P(\theta)}d\theta
+D_{\mathrm{KL}}=\int P(\theta)\log\frac{P(\theta)}{\pi(\theta)}d\theta
 \]
 
 \end_inset
 
-Here, 
+Here,
+ 
 \begin_inset Formula $\pi$
 \end_inset
 
@@ -351,27 +373,28 @@ Here,
 \end_inset
 
 .
- In the case of a base-e logarithm, the unit of 
+ In the case of a base-e logarithm,
+ the unit of 
 \begin_inset Formula $D_{\mathrm{KL}}$
 \end_inset
 
-is nats, and approximately means how many e-foldings it takes to cut the
- prior until the posterior is reached.
- Finding that small region can be a challenge for sampling algorithms (and
- maximum likelihood minimizers).
+is nats,
+ and approximately means how many e-foldings it takes to cut the prior until the posterior is reached.
+ Finding that small region can be a challenge for sampling algorithms (and maximum likelihood minimizers).
 \end_layout
 
 \begin_layout Standard
-In practice, the information gain is already computed by nested sampling
- algorithms internally for error estimation, and we adopt that method as
- a measurement.
- Also, the information gain is related to the number of iterations of the
- nested sampling algorithms needs to zoom in until the likelihood appears
- flat.
+In practice,
+ the information gain is already computed by nested sampling algorithms internally for error estimation,
+ and we adopt that method as a measurement.
+ Also,
+ the information gain is related to the number of iterations of the nested sampling algorithms needs to zoom in until the likelihood appears flat.
 \end_layout
 
 \begin_layout Standard
 \begin_inset Float figure
+placement document
+alignment document
 wide true
 sideways false
 status open
@@ -406,7 +429,9 @@ name "fig:pairwise-posterior"
 \end_inset
 
 Selected pair-wise posterior distributions from some of our problems.
- The 1, 2, 3 and 4-sigma equivalent probability mass contours 
+ The 1,
+ 2,
+ 3 and 4-sigma equivalent probability mass contours 
 \begin_inset CommandInset citation
 LatexCommand citep
 before "made with corner;"
@@ -415,16 +440,22 @@ literal "false"
 
 \end_inset
 
- illustrate non-linear degeneracies (e.g., middle panels), unequal axes (e.g.,
- left-most and right-most top panels), multi-modality (bottom panels).
- The loggamma problem (third panel, bottom row) also has heavy tails towards
- the left.
- Some parameters are uninformative (e.g., param1 in top right panel) or at
- the prior parameter edge (middle left panel, ratio 
+ illustrate non-linear degeneracies (e.g.,
+ middle panels),
+ unequal axes (e.g.,
+ left-most and right-most top panels),
+ multi-modality (bottom panels).
+ The loggamma problem (third panel,
+ bottom row) also has heavy tails towards the left.
+ Some parameters are uninformative (e.g.,
+ param1 in top right panel) or at the prior parameter edge (middle left panel,
+ ratio 
 \begin_inset Formula $q\geq1$
 \end_inset
 
-, top right panel, 
+,
+ top right panel,
+ 
 \begin_inset Formula $0\leq\mathrm{param2}\leq1$
 \end_inset
 
@@ -446,13 +477,12 @@ Modes
 \end_layout
 
 \begin_layout Standard
-When data can be explained with similar quality by different combinations
- of processes, the posterior exhibits multiple peaks.
- This is common in fits of multiple components with (nearly-)interchangable
- predictions, paired with poor descrimination power of the data.
- Algorithms based on local jumps can find it difficult to navigate between
- modes, because a proposal tuned to a single mode may reach another distant
- mode with vanishing proposal probability.
+When data can be explained with similar quality by different combinations of processes,
+ the posterior exhibits multiple peaks.
+ This is common in fits of multiple components with (nearly-)interchangeable predictions,
+ paired with poor discrimination power of the data.
+ Algorithms based on local jumps can find it difficult to navigate between modes,
+ because a proposal tuned to a single mode may reach another distant mode with vanishing proposal probability.
  The bottom row of Figure
 \begin_inset space ~
 \end_inset
@@ -461,6 +491,7 @@ When data can be explained with similar quality by different combinations
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:pairwise-posterior"
+nolink "false"
 
 \end_inset
 
@@ -468,11 +499,14 @@ reference "fig:pairwise-posterior"
 \end_layout
 
 \begin_layout Standard
-To mathematically define multi-modality, a threshold criterion is needed
- to define disconnectedness.
+To mathematically define multi-modality,
+ a threshold criterion is needed to define disconnectedness.
  In principle any clustering algorithm can be used.
- For simplicity and reproducibility, we adopt a simple approach.
- First, histograms of the marginal posteriors are histogrammed into 20 bins.
+ For simplicity and reproducibility,
+ we adopt a very simple,
+ heuristic approach.
+ First,
+ histograms of the marginal posteriors are histogrammed into 20 bins.
  Bins with density less than 1/5 of the peak density are considered 
 \begin_inset Quotes eld
 \end_inset
@@ -482,14 +516,17 @@ empty
 \end_inset
 
 .
- Gaps are identified, and thresholds that bracket the peaks extracted.
+ Gaps are identified,
+ and thresholds that bracket the peaks extracted.
  This is repeated for every dimension.
- Then, all combinations of brackets are computed.
+ Then,
+ all combinations of brackets are computed.
  These are the clusters.
- If posterior samples are members of multiple clusters, the clusters are
- merged.
- The number of remaining, non-empty clusters is the number of modes of the
- problem.
+ If posterior samples are members of multiple clusters,
+ the clusters are merged.
+ The number of remaining,
+ non-empty clusters is the number of modes of the problem.
+ A more rigorous (and likely more complex) approach of mode counting is left for future work.
 \end_layout
 
 \begin_layout Subsection
@@ -498,6 +535,8 @@ Non-Gaussianity
 
 \begin_layout Standard
 \begin_inset Float figure
+placement document
+alignment document
 wide true
 sideways false
 status open
@@ -523,27 +562,26 @@ name "fig:volcurve"
 \end_inset
 
 Probability fraction enclosed as a function of prior volume.
- From the highest likelihood regions outwards, the volume is increased from
- left to right until the entire prior space (
+ From the highest likelihood regions outwards,
+ the volume is increased from left to right until the entire prior space (
 \begin_inset Formula $V=1$
 \end_inset
 
 ) is enclosed.
- The median (cross) indicates how large the posterior volume is relative
- to the prior, and is related to the 
+ The median (cross) indicates how large the posterior volume is relative to the prior,
+ and is related to the 
 \emph on
 information gain
 \emph default
 .
- Quantiles at 5% and 95% indicated as circles indicate the shell where most
- probability mass is enclosed.
+ Quantiles at 5% and 95% indicated as circles indicate the shell where most probability mass is enclosed.
  This is related to the 
 \emph on
 tail weight
 \emph default
 .
- Some problems show wide transitions (e.g., green dashed) relative to a gaussian
- (blue dashed).
+ Some problems show wide transitions (e.g.,
+ green dashed) relative to a Gaussian (blue dashed).
 \end_layout
 
 \end_inset
@@ -561,23 +599,58 @@ tail weight
 \end_layout
 
 \begin_layout Standard
-The Bernstein–von Mises theorem states that when the data are highly informative
-, the posterior is shaped like a multi-variate Gaussian.
- Then, Laplace's approximation of the posterior with a log-quadratic density
- function is justified.
- This can furthermore occur if the model is linear in its parameters, or
- a first-order Taylor expansion of the model provides a reasonable approximation
- at the maximum a posteriori.
- For this reason, some algorithms are constructed to behave optimally when
- the posterior is Gaussian (see e.g., Laplace approximation).
+The Bernstein–von Mises theorem states that when the data are highly informative,
+ the posterior is shaped like a multi-variate Gaussian.
+ Then,
+ Laplace's approximation of the posterior with a log-quadratic density function is justified.
+ This can furthermore occur if the model is linear in its parameters,
+ or a first-order Taylor expansion of the model provides a reasonable approximation at the maximum a posteriori.
+ For this reason,
+ some algorithms are constructed to behave optimally when the posterior is Gaussian (see e.g.,
+ Laplace approximation).
 \end_layout
 
 \begin_layout Standard
-The Gaussianity of a posterior can be easily measured through the surprise
- from a best-fitting multi-variate Gaussian to the posterior.
- We obtain a suitable gaussian from the mean and covariance of the posterior
- samples.
- In multi-modal cases, the posterior is highly non-gaussian.
+The Gaussianity of a posterior can be easily measured through the surprise from a best-fitting multi-variate Gaussian 
+\begin_inset Formula $G=N(\mu,\Sigma)$
+\end_inset
+
+ to the posterior,
+ 
+\begin_inset Formula $D_{KL}(P||G)=\int P(\theta)\log\frac{P(\theta)}{\pi(\theta)}d\theta$
+\end_inset
+
+.
+ We obtain a suitable Gaussian from the mean 
+\begin_inset Formula $\mu$
+\end_inset
+
+ and covariance 
+\begin_inset Formula $\Sigma$
+\end_inset
+
+ of the posterior samples.
+ We then define the non-Gaussianity as:
+ 
+\begin_inset Formula 
+\[
+NG=D_{KL}(P||G)\thinspace/\thinspace d
+\]
+
+\end_inset
+
+In multi-modal cases,
+ the posterior is highly non-Gaussian,
+ 
+\begin_inset Formula $G$
+\end_inset
+
+ is a poor approximation,
+ and thus 
+\begin_inset Formula $NG$
+\end_inset
+
+ is high.
 \end_layout
 
 \begin_layout Subsection
@@ -593,25 +666,26 @@ Width
 \end_layout
 
 \begin_layout Standard
-While the posterior may have ellipsoidal contours like a Gaussian, the posterior
- density may decline steeper or shallower than a square-exponential, i.e.,
+While the posterior may have ellipsoidal contours like a Gaussian,
+ the posterior density may decline steeper or shallower than a square-exponential,
+ i.e.,
  have thin or heavy tails.
- For example, when outliers are allowed (e.g., in student-t distribution or
- explicit outlier modelling), the wings of the posterior can be wide.
+ For example,
+ when outliers are allowed (e.g.,
+ in student-t distribution or explicit outlier modelling),
+ the wings of the posterior can be wide.
  Some algorithms may be optimized for square-exponential declines.
- Another cause of heavy tails is when most data points are fitted well by
- one component, and a minor component relevant for a small data subset improves
- the fit slightly (for example, in blind spectral line searches on top of
- a continuum).
- This leads to a phase transition, where the parameter space to be explored
- changes rapidly (with small likelihood change) from a wide volume to a
- narrow volume.
+ Another cause of heavy tails is when most data points are fitted well by one component,
+ and a minor component relevant for a small data subset improves the fit slightly (for example,
+ in blind spectral line searches on top of a continuum).
+ This leads to a phase transition,
+ where the parameter space to be explored changes rapidly (with small likelihood change) from a wide volume to a narrow volume.
  This is difficult for many samplers.
 \end_layout
 
 \begin_layout Standard
-To quantify how the weight is distributed over the prior volume, we compute
- the prior volume above a given likelihood threshold.
+To quantify how the weight is distributed over the prior volume,
+ we compute the prior volume above a given likelihood threshold.
  This is illustrated in Figure
 \begin_inset space ~
 \end_inset
@@ -620,32 +694,41 @@ To quantify how the weight is distributed over the prior volume, we compute
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:volcurve"
+nolink "false"
 
 \end_inset
 
 .
  We compute the 
-\begin_inset Formula $5\%$
+\begin_inset Formula $2.5\%$
 \end_inset
 
  and 
-\begin_inset Formula $95\%$
+\begin_inset Formula $97.5\%$
 \end_inset
 
  quantiles of the volume ranges where most of the probability mass resides,
  and compute the tail weight as:
 \begin_inset Formula 
 \[
-\mathrm{TW}=\log\frac{V_{5\%}}{V_{95\%}}
+\mathrm{TW}=\log_{10}\left(\frac{V_{97.5\%}}{V_{2.5\%}}\right)-\log_{10}d
 \]
 
 \end_inset
 
-In practice, the mapping of volume and likelihood, as well as the normalising
- constant, the marginal likelihood integrated over volume shrinkages, is
- already computed internally in nested sampling.
+The log-dimensionality is subtracted because we observe that for a Gaussian,
+ 
+\begin_inset Formula $\left(\frac{V_{97.5\%}}{V_{2.5\%}}\right)$
+\end_inset
+
+ increases linearly with the dimensionality.
+ In practice,
+ the mapping of volume and likelihood,
+ as well as the normalising constant,
+ the marginal likelihood integrated over volume shrinkages,
+ are already computed by nested sampling.
  We cap the value at 
-\begin_inset Formula $\mathrm{TW}=\log10\times d$
+\begin_inset Formula $\mathrm{TW}=7$
 \end_inset
 
 .
@@ -656,14 +739,13 @@ Inequality
 \end_layout
 
 \begin_layout Standard
-Some model parameters may alter the model prediction strongly, while others
- have more minute implications.
- Because of this, the posterior of some parameters can be consistent with
- the prior with no information learnt.
- For other parameters, its plausible range may have diminished by several
- orders of magnitude.
- Proposals that are isotropic over the parameter space directions then may
- perform poorly.
+Some model parameters may alter the model prediction strongly,
+ while others have more minute implications.
+ Because of this,
+ the posterior of some parameters can be consistent with the prior with no information learnt.
+ For other parameters,
+ its plausible range may have diminished by several orders of magnitude.
+ Proposals that are isotropic over the parameter space directions then may perform poorly.
  The top row of Figure
 \begin_inset space ~
 \end_inset
@@ -672,6 +754,7 @@ Some model parameters may alter the model prediction strongly, while others
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:pairwise-posterior"
+nolink "false"
 
 \end_inset
 
@@ -680,7 +763,8 @@ reference "fig:pairwise-posterior"
 \end_layout
 
 \begin_layout Standard
-We quantify the inequality of parameters in problems, as:
+We quantify the inequality of parameters in problems,
+ as:
 \end_layout
 
 \begin_layout Standard
@@ -691,7 +775,8 @@ We quantify the inequality of parameters in problems, as:
 
 \end_inset
 
-Here, the information gain 
+Here,
+ the information gain 
 \begin_inset Formula $\mathrm{IG}_{i}$
 \end_inset
 
@@ -707,16 +792,18 @@ Here, the information gain
 \begin_inset Formula $P(\theta_{i}|D)$
 \end_inset
 
- marginal distributions as: 
+ marginal distributions as:
+ 
 \begin_inset Formula 
 \[
-\mathrm{IG}_{i}=\int\pi(\theta_{i})\log_{2}\frac{\pi(\theta_{i})}{P(\theta_{i}|D)}d\theta_{i}
+\mathrm{IG}_{i}=\int P(\theta_{i}|D)\log_{2}\frac{P(\theta_{i}|D)}{\pi(\theta_{i})}d\theta_{i}
 \]
 
 \end_inset
 
-If all parameters have similar posterior uncertainties, 
-\begin_inset Formula $\mathrm{IE}\approx0$
+If all parameters have similar posterior uncertainties,
+ 
+\begin_inset Formula $\mathrm{IE}\approx1$
 \end_inset
 
 .
@@ -734,6 +821,8 @@ Phase transitions
 
 \begin_layout Standard
 \begin_inset Float figure
+placement document
+alignment document
 wide false
 sideways false
 status open
@@ -758,8 +847,8 @@ name "fig:phasetransition"
 
 \end_inset
 
-In the prior volume - likelihood plot of nested sampling, phase transitions
- are visible as non-convexities.
+In the prior volume - likelihood plot of nested sampling,
+ phase transitions are visible as non-convexities.
  The dashed curve illustrates our technique for closing the curve.
  
 \end_layout
@@ -779,8 +868,8 @@ In the prior volume - likelihood plot of nested sampling, phase transitions
 \end_layout
 
 \begin_layout Standard
-Phase transitions are sudden, unexpected changes in volume when the likelihood
- is changed continuously.
+Phase transitions are sudden,
+ unexpected changes in volume when the likelihood is changed continuously.
  An example is shown in Figure
 \begin_inset space ~
 \end_inset
@@ -789,13 +878,14 @@ Phase transitions are sudden, unexpected changes in volume when the likelihood
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:phasetransition"
+nolink "false"
 
 \end_inset
 
 .
- This is common in multi-component fitting, where the rough overall data
- is first approximated, and then fine tuning a second component onto a subset
- of the data leads to a rapid further increase in the likelihood.
+ This is common in multi-component fitting,
+ where the rough overall data is first approximated,
+ and then fine tuning a second component onto a subset of the data leads to a rapid further increase in the likelihood.
  The situation has been likened in 
 \begin_inset CommandInset citation
 LatexCommand citet
@@ -804,10 +894,10 @@ literal "false"
 
 \end_inset
 
- to condensation of a water vapor into liquid water, where small temperature
- changes leads to a sudden change in volume.
- This can affect some inference techniques, because the relevant geometry
- of the (proposal) space before and after the transition is radically different.
+ to condensation of a water vapor into liquid water,
+ where small temperature changes leads to a sudden change in volume.
+ This can affect some inference techniques,
+ because the relevant geometry of the (proposal) space before and after the transition is radically different.
  
 \end_layout
 
@@ -821,8 +911,7 @@ literal "false"
 
 \end_inset
 
- discussed that the slope of the likelihood-volume curve deviates strongly
- from a powerlaw with index -1.
+ discussed that the slope of the likelihood-volume curve deviates strongly from a power law with index -1.
  Figure
 \begin_inset space ~
 \end_inset
@@ -831,12 +920,14 @@ literal "false"
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:phasetransition"
+nolink "false"
 
 \end_inset
 
- illustrates a phase transition in blue, with a wide plateau followed by
- a spike of small volume.
- Here, we use an extrapolating powerlaw (purple in Figure
+ illustrates a phase transition in blue,
+ with a wide plateau followed by a spike of small volume.
+ Here,
+ from each point on the curve we extrapolate a power law with index -1 rightward (purple in Figure
 \begin_inset space ~
 \end_inset
 
@@ -844,15 +935,25 @@ reference "fig:phasetransition"
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:phasetransition"
+nolink "false"
 
 \end_inset
 
-) with index -1 to raise all points to the right of the curve.
- From both the modified curve and the original curve, we compute the evidence,
+) and use it to raise all points to the right of the curve to the extrapolation.
+ From both the modified curve 
+\begin_inset Formula $L'(V)$
+\end_inset
+
+ and the original curve 
+\begin_inset Formula $L(V)$
+\end_inset
+
+,
+ we compute the evidence,
  and consider the ratio as our phase transition indicator:
 \begin_inset Formula 
 \[
-P=\frac{\int L'(V)\,dV}{\int L(V)\,dV}
+\Phi=\frac{\int L'(V)\,dV}{\int L(V)\,dV}
 \]
 
 \end_inset
@@ -861,12 +962,31 @@ Here the denominator with
 \begin_inset Formula $L$
 \end_inset
 
- is the normal nested sampling computation of the evidence, while the numerator
- contains the modified curve, 
+ is the normal nested sampling computation of the evidence,
+ while the numerator contains the modified curve,
+ 
 \begin_inset Formula $L'$
 \end_inset
 
-, as described above.
+,
+ as described above.
+ By construction,
+ 
+\begin_inset Formula $\Phi\geq1$
+\end_inset
+
+.
+ If no phase transitions are present,
+ 
+\begin_inset Formula $\Phi\approx1$
+\end_inset
+
+,
+ while 
+\begin_inset Formula $\Phi>1$
+\end_inset
+
+ indicates phase transitions.
 \end_layout
 
 \begin_layout Subsection
@@ -884,10 +1004,10 @@ name "subsec:Compact-visualisation-of"
 \end_layout
 
 \begin_layout Standard
-For a visual impression of the experienced parameter space and its linear
- and non-linear degeneracies, a common tool are corner plots.
- These are also known in the statistics literature as pairs plots, and an
- example is shown in Figure
+For a visual impression of the experienced parameter space and its linear and non-linear degeneracies,
+ a common tool are corner plots.
+ These are also known in the statistics literature as pairs plots,
+ and an example is shown in Figure
 \begin_inset space ~
 \end_inset
 
@@ -895,12 +1015,13 @@ For a visual impression of the experienced parameter space and its linear
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:corner-example-1"
+nolink "false"
 
 \end_inset
 
 .
- Here, we quantify the further interaction between pairs of parameters and
- present a compact visualisation as a 
+ Here,
+ we quantify the further interaction between pairs of parameters and present a compact visualisation as a 
 \begin_inset Formula $d\times d$
 \end_inset
 
@@ -910,33 +1031,38 @@ reference "fig:corner-example-1"
 \end_inset
 
  expressed in bits.
- The upper and lower triangles are populated with correlation coefficients
- of pairs of parameters.
+ The upper and lower triangles are populated with correlation coefficients of pairs of parameters.
 \end_layout
 
 \begin_layout Standard
 Corner plots only consider the posterior distribution.
- However, to express the experience of a sampler fairly, the characterization
- should consider also the prior.
- Here we work with the posterior samples expressed with coordinates on the
- prior cumulative probability distribution (probability integral transform).
- In the case of nested samplers working with prior transforms based on the
- unit hyper-cube, this merely means we take the un-transformed posterior
- samples.
- First, we characterize the linear degeneracies.
+ However,
+ to express the experience of a sampler fairly,
+ the characterization should consider also the prior.
+ Here we work with the posterior samples expressed with coordinates on the prior cumulative probability distribution (probability integral transform).
+ In the case of nested samplers working with prior transforms based on the unit hyper-cube,
+ this merely means we take the un-transformed posterior samples.
+ First,
+ we characterize the linear degeneracies.
  the pair-wise Pearson correlation coefficient 
 \begin_inset Formula $\rho_{\mathrm{Pearson}}$
 \end_inset
 
  is calculated for each posterior parameter pair.
- Secondly, we characterize residual non-linear degeneracies.
- We apply an affine transform which standardizes the parameter space to
- be linearly independent, and then compute the pair-wise Spearman correlation
- coefficient 
+ Secondly,
+ we characterize residual non-linear degeneracies.
+ On each parameter pair,
+ we compute the Spearman correlation coefficient 
 \begin_inset Formula $\rho_{\mathrm{Spearman}}$
 \end_inset
 
-.
+ of ordinary least square residuals.
+ Since the least square regression has direction,
+ for each pair we adopt the lower 
+\begin_inset Formula $\rho_{\mathrm{Spearman}}$
+\end_inset
+
+ of the two possible directions.
 \end_layout
 
 \begin_layout Standard
@@ -948,10 +1074,12 @@ The obtained matrix visualisation is demonstrated in Figure
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:degeneracy-viz-example"
+nolink "false"
 
 \end_inset
 
-, corresponding to the corner plot in Figure
+,
+ corresponding to the corner plot in Figure
 \begin_inset space ~
 \end_inset
 
@@ -959,15 +1087,15 @@ reference "fig:degeneracy-viz-example"
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:corner-example-1"
+nolink "false"
 
 \end_inset
 
 .
- The diagonal shows the parameter information gain, the lower triangle indicates
- the linear degeneracies and the upper triangle indicates the non-linear
- degeneracies.
- In the case of a un-correlated gaussian, illustrated in the right panel
- of Figure
+ The diagonal shows the parameter information gain,
+ the lower triangle indicates the linear degeneracies and the upper triangle indicates the non-linear degeneracies.
+ In the case of a un-correlated Gaussian,
+ illustrated in the right panel of Figure
 \begin_inset space ~
 \end_inset
 
@@ -975,14 +1103,18 @@ reference "fig:corner-example-1"
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:degeneracy-viz-example"
+nolink "false"
 
 \end_inset
 
-, the off-diagonal elements are zero.
+,
+ the off-diagonal elements are zero.
 \end_layout
 
 \begin_layout Standard
 \begin_inset Float figure
+placement document
+alignment document
 wide true
 sideways false
 status open
@@ -1018,9 +1150,10 @@ literal "false"
 \end_inset
 
  for the exo-rv problem with 1 planet.
- The degeneracies can be non-linear (see e.g., ecc_p1 and K-p1).
- Some parameters are uninformative (omega_p1), while others are very well
- constrained.
+ The degeneracies can be non-linear (see e.g.,
+ ecc_p1 and K-p1).
+ Some parameters are uninformative (omega_p1),
+ while others are very well constrained.
 \end_layout
 
 \end_inset
@@ -1035,6 +1168,8 @@ literal "false"
 
 \begin_layout Standard
 \begin_inset Float figure
+placement document
+alignment document
 wide false
 sideways false
 status open
@@ -1061,7 +1196,8 @@ name "fig:degeneracy-viz-example"
 
 \end_inset
 
-Proposed visualisation of the degeneracies, corresponding to Figure
+Proposed visualisation of the degeneracies,
+ corresponding to Figure
 \begin_inset space ~
 \end_inset
 
@@ -1069,21 +1205,24 @@ Proposed visualisation of the degeneracies, corresponding to Figure
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:corner-example-1"
+nolink "false"
 
 \end_inset
 
 .
- The lower left triangle in blue shows linear correlation between parameter
- posteriors (
+ The lower left triangle in blue shows linear correlation between parameter posteriors (
 \begin_inset Formula $|\rho_{\mathrm{Pearson}}|$
 \end_inset
 
- from 0 to 1), with darker color indicating stronger correlation.
- Similarly, the upper right traingle in orange shows Spearman rank correlation
- between parameter posteriors, after removing the linear correlations.
+ from 0 to 1),
+ with darker color indicating stronger correlation.
+ Similarly,
+ the upper right triangle in orange shows Spearman rank correlation between parameter posteriors,
+ after removing the linear correlations.
  The diagonal entries in green indicate the information gain on the parameter,
  increasing from white to darker colors.
- Here, some parameters are uninformative while others are highly informative.
+ Here,
+ some parameters are uninformative while others are highly informative.
 \end_layout
 
 \end_inset
@@ -1115,14 +1254,17 @@ Same as Figure
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:degeneracy-viz-example"
+nolink "false"
 
 \end_inset
 
-, but for our 16 dimensional Gaussian toy problem.
- Here, the non-diagonal entries are near zero, indicating (correctly) that
- there are no parameter degeneracies.
- The diagonal elements vary, with the first parameter being much less informativ
-e than the others.
+,
+ but for our 16 dimensional Gaussian toy problem.
+ Here,
+ the non-diagonal entries are near zero,
+ indicating (correctly) that there are no parameter degeneracies.
+ The diagonal elements vary,
+ with the first parameter being much less informative than the others.
 \end_layout
 
 \end_inset
@@ -1141,6 +1283,8 @@ e than the others.
 
 \begin_layout Standard
 \begin_inset Float table
+placement document
+alignment document
 wide true
 sideways false
 status open
@@ -1173,10 +1317,15 @@ name "tab:List-of-problems"
 \end_inset
 
 List of problems analysed.
- The columns describe (1) research field, (2) name, (3) dimensionality,
- (4) model evaluation cost in milliseconds, (5) information gain, (6) tail
- weight, (7) parameter inequality, (8) Gaussian approximation information
- loss, (9) phase transition.
+ The columns describe (1) research field,
+ (2) name,
+ (3) dimensionality,
+ (4) model evaluation cost in milliseconds,
+ (5) information gain,
+ (6) tail weight,
+ (7) parameter inequality,
+ (8) Gaussian approximation information loss,
+ (9) phase transition.
 \end_layout
 
 \end_inset
@@ -1191,6 +1340,8 @@ List of problems analysed.
 
 \begin_layout Standard
 \begin_inset Float figure
+placement document
+alignment document
 wide true
 sideways false
 status open
@@ -1235,6 +1386,8 @@ Results
 
 \begin_layout Standard
 \begin_inset Float figure
+placement document
+alignment document
 wide true
 sideways false
 status open
@@ -1362,16 +1515,17 @@ Posterior structure visualisations (see section
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "subsec:Compact-visualisation-of"
+nolink "false"
 
 \end_inset
 
 ) for our real physics inference problems.
- The number of entries indicates the dimensionality, diagonal entries indicate
- parameter information gain, the bottom left triangle entries indicate linear
- parameter degeneracies and the upper right triangle indicates non-linear
- degeneracies.
- For example, the top left panel shows no non-linear degeneracy, while the
- bottom left panel shows strong non-linear degeneracies.
+ The number of entries indicates the dimensionality,
+ diagonal entries indicate parameter information gain,
+ the bottom left triangle entries indicate linear parameter degeneracies and the upper right triangle indicates non-linear degeneracies.
+ For example,
+ the top left panel shows no non-linear degeneracy,
+ while the bottom left panel shows strong non-linear degeneracies.
 \end_layout
 
 \end_inset
@@ -1390,6 +1544,8 @@ reference "subsec:Compact-visualisation-of"
 
 \begin_layout Standard
 \begin_inset Float figure
+placement document
+alignment document
 wide false
 sideways false
 status open
@@ -1415,13 +1571,13 @@ name "fig:corr"
 
 \end_inset
 
-For each problem, the evolution of the Pearson correlation coefficient (x-axis)
- and the Spearman correlation coefficient as nested sampling raises the
- likelihood threshold is shown as a curve.
+For each problem,
+ the evolution of the Pearson correlation coefficient (x-axis) and the Spearman correlation coefficient as nested sampling raises the likelihood threshold is shown as a curve.
  Low coefficients (bottom left corner) indicate independent parameters,
  high x-axis values indicate strong linear degeneracies.
- High y-axis values indicate strong non-linear degeneracies, such as multiple
- modes, or bananas in the parameter space.
+ High y-axis values indicate strong non-linear degeneracies,
+ such as multiple modes,
+ or bananas in the parameter space.
 \end_layout
 
 \end_inset
@@ -1443,12 +1599,14 @@ The collated problems are listed in Table
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "tab:List-of-problems"
+nolink "false"
 
 \end_inset
 
-, together with the derived characteristics.
- The model evaluation cost is also listed, and ranges from less than 1ms
- to almost 1s per likelihood evaluations.
+,
+ together with the derived characteristics.
+ The model evaluation cost is also listed,
+ and ranges from less than 1ms to almost 1s per likelihood evaluations.
  Figure
 \begin_inset space ~
 \end_inset
@@ -1457,6 +1615,7 @@ reference "tab:List-of-problems"
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:Models"
+nolink "false"
 
 \end_inset
 
@@ -1469,22 +1628,24 @@ real
 \begin_inset Quotes erd
 \end_inset
 
- physics inference problems (solid circles), there does not appear to a
- trend or preferred region of the parameter space; all regions are covered.
+ physics inference problems (solid circles),
+ there does not appear to a trend or preferred region of the parameter space;
+ all regions are covered.
  The mock problems (crosses) cover the full parameter space as well.
 \end_layout
 
 \begin_layout Standard
 The exoplanet radial velocity fitting with one planet shows a phase transition,
  and heavy-tailed posteriors.
- These properties are also produced by the spike and slab toy problem variations
-, calculated here in only two dimensions.
- Fitting for 3 exoplanets yield 9 modes, and the LSQ12dlf analyses show
- a similar number of modes.
- The multisine mock problem mimics the properties of the exoplanet radial
- velocity fitting in terms of multi-modality, width, parameter asymmetry,
- phase transition and heavy-tailed posteriors, suggesting it is a useful
- approximation.
+ These properties are also produced by the spike and slab toy problem variations,
+ calculated here in only two dimensions.
+ Fitting for 3 exoplanets yields 9 modes,
+ and the LSQ12dlf analyses show a similar number of modes.
+ The multisine mock problem mimics the properties of the exoplanet radial velocity fitting in terms of multi-modality,
+ width,
+ parameter inequality,
+ phase transition and heavy-tailed posteriors,
+ suggesting it is a useful approximation.
 \end_layout
 
 \begin_layout Standard
@@ -1496,11 +1657,14 @@ As already shown in Figure
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:volcurve"
+nolink "false"
 
 \end_inset
 
-, the information gain differs substantially.
- Additionally, the asymmetry column of Table
+,
+ the information gain differs substantially.
+ Additionally,
+ the inequality column of Table
 \begin_inset space ~
 \end_inset
 
@@ -1508,6 +1672,7 @@ reference "fig:volcurve"
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "tab:List-of-problems"
+nolink "false"
 
 \end_inset
 
@@ -1516,7 +1681,8 @@ reference "tab:List-of-problems"
 \end_layout
 
 \begin_layout Standard
-Beyond those summary statistics, Figure
+Beyond those summary statistics,
+ Figure
 \begin_inset space ~
 \end_inset
 
@@ -1524,6 +1690,7 @@ Beyond those summary statistics, Figure
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:Posterior-structure-visualisatio"
+nolink "false"
 
 \end_inset
 
@@ -1536,22 +1703,26 @@ reference "fig:Posterior-structure-visualisatio"
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "subsec:Compact-visualisation-of"
+nolink "false"
 
 \end_inset
 
-, this presents a diversity in dimensionality, as indicated by the number
- of entries, the parameter information gain (diagonal entries), the linear
- parameter degeneracies (bottom left triangles) and non-linear degeneracies
- (upper right entries).
- Some inference problems, such as cmb-planck (top left panel) show no non-linear
- degeneracy, while others (agn-xray-spectrum, bottom left panel) show strong
- non-linear degeneracies.
+,
+ this presents a diversity in dimensionality,
+ as indicated by the number of entries,
+ the parameter information gain (diagonal entries),
+ the linear parameter degeneracies (bottom left triangles) and non-linear degeneracies (upper right entries).
+ Some inference problems,
+ such as cmb-planck (top left panel) show no non-linear degeneracy,
+ while others (agn-xray-spectrum,
+ bottom left panel) show strong non-linear degeneracies.
 \end_layout
 
 \begin_layout Standard
-Finally, we have a deeper look at the evolving likelihood surface as the
- sampler moves from the prior to the posterior mass.
- To this end, we observe the live point distribution at regular snapshots.
+Finally,
+ we have a deeper look at the evolving likelihood surface as the sampler moves from the prior to the posterior mass.
+ To this end,
+ we observe the live point distribution at regular snapshots.
  We apply the same procedure as in Figure
 \begin_inset space ~
 \end_inset
@@ -1560,11 +1731,11 @@ Finally, we have a deeper look at the evolving likelihood surface as the
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "subsec:Compact-visualisation-of"
+nolink "false"
 
 \end_inset
 
- and note the largest Pearson and (linearly whitened) Spearman correlation
- coefficient.
+ and note the largest Pearson and (linearly whitened) Spearman correlation coefficient.
  Figure
 \begin_inset space ~
 \end_inset
@@ -1573,16 +1744,16 @@ reference "subsec:Compact-visualisation-of"
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:corr"
+nolink "false"
 
 \end_inset
 
  shows the evolution of these values for each inference problem.
- For problems with no parameter interactions, such as the asymgauss or beta,
+ For problems with no parameter interactions,
+ such as the asymgauss or beta,
  the curves remain in the bottom left corner of the plot.
- Other problems however show strong linear (Pearson) and/or non-linear (whitened
- Spearman) degeneracies over the parameter space.
- This behaviour is stronger for real problems (dashed and solid curves)
- than toy problems (dotted curves).
+ Other problems however show strong linear (Pearson) and/or non-linear (whitened Spearman) degeneracies over the parameter space.
+ This behaviour is stronger for real problems (dashed and solid curves) than toy problems (dotted curves).
 \end_layout
 
 \begin_layout Section
@@ -1594,8 +1765,8 @@ Strengths and limitations of the collected inference problems
 \end_layout
 
 \begin_layout Standard
-This work has assembled a list of parametric Bayesian inference applications
- from astronomy, cosmology and particle physics.
+This work has assembled a list of parametric Bayesian inference applications from astronomy,
+ cosmology and particle physics.
  This is augmented by mock applications and toy problems.
  A reproducible installation is available at 
 \begin_inset Foot
@@ -1617,15 +1788,14 @@ https://github.com/JohannesBuchner/space-of-inference-spaces/
 
 \end_inset
 
-, allowing researchers to test with identical priors and likelihoods.
- The parameter spaces and posterior distributions have been characterized
- and cast into a space of parametric inference spaces.
+,
+ allowing researchers to test with identical priors and likelihoods.
+ The parameter spaces and posterior distributions have been characterized and cast into a space of parametric inference spaces.
  
 \end_layout
 
 \begin_layout Standard
-A major result of this work is that the parameter space structure of these
- inference spaces is highly diverse.
+A major result of this work is that the parameter space structure of these inference spaces is highly diverse.
  This is illustrated in Figure
 \begin_inset space ~
 \end_inset
@@ -1634,13 +1804,15 @@ A major result of this work is that the parameter space structure of these
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:Models"
+nolink "false"
 
 \end_inset
 
 .
- They span from low to high dimensionality, can be mono-, bi- or multi-modal.
- A variety of complex posterior distribution morphologies appear as illustrated
- in Figure
+ They span from low to high dimensionality,
+ can be mono-,
+ bi- or multi-modal.
+ A variety of complex posterior distribution morphologies appear as illustrated in Figure
 \begin_inset space ~
 \end_inset
 
@@ -1648,24 +1820,31 @@ reference "fig:Models"
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:Posterior-structure-visualisatio"
+nolink "false"
 
 \end_inset
 
-, and inference on the parameters ranges from uninformative to extremely
- informative.
- Furthermore, the computational cost of the physical models can range from
- milliseconds to seconds.
+,
+ and inference on the parameters ranges from uninformative to extremely informative.
+ Furthermore,
+ the computational cost of the physical models can range from milliseconds to seconds.
  
 \end_layout
 
 \begin_layout Standard
-To test samplers in realistic, but controlled conditions with known posteriors
- and evidence, toy inference problems are commonly used.
- Standard ones include a Gaussian, Neal's funnel, log-gamma, eggbox, rosenbrock
- and spike+slab, which are also included here.
- However, toy inference problems may not represent the experience of a sampler
- exploring the parameter space of a real data analysis problem.
- In particular, Figure
+To test samplers in realistic,
+ but controlled conditions with known posteriors and evidence,
+ toy inference problems are commonly used.
+ Standard ones include a Gaussian,
+ Neal's funnel,
+ log-gamma,
+ eggbox,
+ rosenbrock and spike+slab,
+ which are also included here.
+ However,
+ toy inference problems may not represent the experience of a sampler exploring the parameter space of a real data analysis problem.
+ In particular,
+ Figure
 \begin_inset space ~
 \end_inset
 
@@ -1673,21 +1852,28 @@ To test samplers in realistic, but controlled conditions with known posteriors
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:corr"
+nolink "false"
 
 \end_inset
 
- demonstrates that real inference problems can have stronger degeneracies
- than toy problems.
- There is more work to be done to create toy inference problems that closely
- mimick real physics inference.
- In this vain, we provide several small data sets which are easy to work
- with yet represent real physics data analysis (e.g., multisine, compton-thick-AGN
-, sample-dist, powerlaw-relation, lennard-jones).
- In the future, perhaps the more complex data analysis pipelines can be
- replaced by auxiliary functions, for example based on Gaussian mixtures
- or normalising flows, which closely approximate the real likelihood function,
- but have known, analytic properties (integral Z, marginal distributions).
- Despite the limitations of artificial toy problems, Figure
+ demonstrates that real inference problems can have stronger degeneracies than toy problems.
+ There is more work to be done to create toy inference problems that closely mimick real physics inference.
+ In this vain,
+ we provide several small data sets which are easy to work with yet represent real physics data analysis (e.g.,
+ multisine,
+ compton-thick-AGN,
+ sample-dist,
+ powerlaw-relation,
+ lennard-jones).
+ In the future,
+ perhaps the more complex data analysis pipelines can be replaced by auxiliary functions,
+ for example based on Gaussian mixtures or normalising flows,
+ which closely approximate the real likelihood function,
+ but have known,
+ analytic properties (integral Z,
+ marginal distributions).
+ Despite the limitations of artificial toy problems,
+ Figure
 \begin_inset space ~
 \end_inset
 
@@ -1695,11 +1881,11 @@ reference "fig:corr"
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:Models"
+nolink "false"
 
 \end_inset
 
- demonstrates that these cover the same (vast) parameter space as the real
- inference problems (compare the filled circles to crosses).
+ demonstrates that these cover the same (vast) parameter space as the real inference problems (compare the filled circles to crosses).
 \end_layout
 
 \begin_layout Subsection
@@ -1707,8 +1893,8 @@ Performance of samplers
 \end_layout
 
 \begin_layout Standard
-In recent years, a variety of Bayesian inference sampling packages have
- been published.
+In recent years,
+ a variety of Bayesian inference sampling packages have been published.
  MCMC-based algorithms include emcee 
 \begin_inset CommandInset citation
 LatexCommand citep
@@ -1717,7 +1903,8 @@ literal "false"
 
 \end_inset
 
-, Stan 
+,
+ Stan 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "Carpenter2017"
@@ -1725,7 +1912,8 @@ literal "false"
 
 \end_inset
 
-, zeus 
+,
+ zeus 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "Karamanis2020"
@@ -1750,7 +1938,8 @@ literal "false"
 
 \end_inset
 
-, polychord 
+,
+ polychord 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "Handley2015a"
@@ -1758,7 +1947,8 @@ literal "false"
 
 \end_inset
 
-, DNest4 
+,
+ DNest4 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "Brewer2018DNest4"
@@ -1766,7 +1956,8 @@ literal "false"
 
 \end_inset
 
-, dynesty 
+,
+ dynesty 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "Speagle2020"
@@ -1774,7 +1965,8 @@ literal "false"
 
 \end_inset
 
-, ultranest 
+,
+ ultranest 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "UltraNest"
@@ -1782,7 +1974,8 @@ literal "false"
 
 \end_inset
 
-, nautilus 
+,
+ nautilus 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "Lange2023"
@@ -1835,7 +2028,8 @@ https://iminuit.readthedocs.io/
 
 \end_inset
 
-, see 
+,
+ see 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "iminuit,James:1975dr"
@@ -1848,8 +2042,8 @@ literal "false"
 
 \end_inset
 
-, which can be improved with Gaussian mixtures learned by variational Bayes
- and importance sampling 
+,
+ which can be improved with Gaussian mixtures learned by variational Bayes and importance sampling 
 \begin_inset Foot
 status open
 
@@ -1865,7 +2059,8 @@ https://github.com/pypmc/pypmc
 
 \end_inset
 
-, see 
+,
+ see 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Beaujean2013"
@@ -1882,33 +2077,32 @@ literal "false"
 \end_layout
 
 \begin_layout Standard
-It is interesting to firstly try to understand in which regions of the parameter
- space an inference algorithm gives reliable results.
- This is achievable with problems where the truth is known (toy problems
- or generated data sets).
+It is interesting to firstly try to understand in which regions of the parameter space an inference algorithm gives reliable results.
+ This is achievable with problems where the truth is known (toy problems or generated data sets).
  Only a subsequent step is performance comparison among reliable algorithms.
- To this end, we point out a few guidelines for comparing Bayesian samplers
- fairly.
- Initially, the full sample of problems presented here should be considered.
- If only a subset is of interest, this should be clearly and transparently
- stated (e.g., focus on low-dimensional inference problems, on mono-modal
- inference problems, etc.).
- It is a trivial statement that with more compute budget, a better accuracy
- and reliability can be achieved.
- Therefore, we recommend plotting bias or accuracy against computational
- cost for each algorithm and runtime.
- One quantifier of computational cost is the number of (likelihood) model
- evaluations or wall-clock time.
- The former is suitable for computationally challenging likelihoods, the
- latter is more relevant for computationally cheap models paired with algorithms
- that require costly training (such as deep neural networks).
+ To this end,
+ we point out a few guidelines for comparing Bayesian samplers fairly.
+ Initially,
+ the full sample of problems presented here should be considered.
+ If only a subset is of interest,
+ this should be clearly and transparently stated (e.g.,
+ focus on low-dimensional inference problems,
+ on mono-modal inference problems,
+ etc.).
+ It is a trivial statement that with more compute budget,
+ a better accuracy and reliability can be achieved.
+ Therefore,
+ we recommend plotting bias or accuracy against computational cost for each algorithm and runtime.
+ One quantifier of computational cost is the number of (likelihood) model evaluations or wall-clock time.
+ The former is suitable for computationally challenging likelihoods,
+ the latter is more relevant for computationally cheap models paired with algorithms that require costly training (such as deep neural networks).
  
 \end_layout
 
 \begin_layout Standard
 It remains to be defined how to quantify the fidelity of the computation.
- To quantify posterior fidelity, see for example the probability-probability
- plots and Jensen-Shannon divergence quantification in 
+ To quantify posterior fidelity,
+ see for example the probability-probability plots and Jensen-Shannon divergence quantification in 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Romero-Shaw2020"
@@ -1917,16 +2111,19 @@ literal "false"
 \end_inset
 
 .
- However, the reliable retrieval of 
+ However,
+ the reliable retrieval of 
 \begin_inset Formula $3\sigma$
 \end_inset
 
  upper or lower parameter limits may also be of interest.
- Finally, when the true marginal likelihood 
+ Finally,
+ when the true marginal likelihood 
 \begin_inset Formula $Z$
 \end_inset
 
- is known and can be tested against, recovering 
+ is known and can be tested against,
+ recovering 
 \begin_inset Formula $\ln Z$
 \end_inset
 
@@ -1934,8 +2131,8 @@ literal "false"
 \begin_inset Formula $\sim0.3$
 \end_inset
 
- may not be useful in the context of Bayes factors, as it only mildly affects
- the interpretation.
+ may not be useful in the context of Bayes factors,
+ as it only mildly affects the interpretation.
 \end_layout
 
 \begin_layout Subsection
@@ -1944,10 +2141,9 @@ Future work
 
 \begin_layout Standard
 Breakthrough progress in machine learning is typically driven by (1) open,
- large, high-quality data sets and (2) a clear formulation of a meaningful
- objective.
- Examples span from MNIST’s challenge of digitizing hand-drawn numbers to
- the Critical Assessment of Structure Prediction (CASP) 
+ large,
+ high-quality data sets and (2) a clear formulation of a meaningful objective.
+ Examples span from MNIST’s challenge of digitizing hand-drawn numbers to the Critical Assessment of Structure Prediction (CASP) 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "Moult1995"
@@ -1955,7 +2151,8 @@ literal "false"
 
 \end_inset
 
- protein-folding challenge, recently met by AlphaFold 
+ protein-folding challenge,
+ recently met by AlphaFold 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "Jumper2021"
@@ -1973,15 +2170,15 @@ literal "false"
 \end_inset
 
  demonstrated that optimization algorithms can be derived by machine learning.
- Perhaps a similar breakthrough can be accomplished for optimal Bayesian
- inference sampling procedures, by providing a open, large data base and
- a clear objective.
- To this end, the survey of inference problems encountered across cosmology,
- particle physics, astrophysics and astronomy is presented.
- The representative database includes fully specified likelihood and priors
- in a runnable docker image with python interfaces.
- While similar previous work has focusd on providing simplified models that
- serve as unit-tests 
+ Perhaps a similar breakthrough can be accomplished for optimal Bayesian inference sampling procedures,
+ by providing a open,
+ large data base and a clear objective.
+ To this end,
+ the survey of inference problems encountered across cosmology,
+ particle physics,
+ astrophysics and astronomy is presented.
+ The representative database includes fully specified likelihood and priors in a runnable docker image with python interfaces.
+ While similar previous work has focusd on providing simplified models that serve as unit-tests 
 \begin_inset CommandInset citation
 LatexCommand citep
 before "e.g.,"
@@ -1990,22 +2187,21 @@ literal "false"
 
 \end_inset
 
-, this work uses real-world inference with the software pipelines employed
- by researchers.
+,
+ this work uses real-world inference with the software pipelines employed by researchers.
 \end_layout
 
 \begin_layout Standard
-As a first step, existing and novel algorithms can be judged across the
- parameter space of problems for their empirical behavior and robustness,
+As a first step,
+ existing and novel algorithms can be judged across the parameter space of problems for their empirical behavior and robustness,
  and to make well-founded recommendation for specific applications.
- For more rapid testing and a unified interface, fast model emulators for
- the provided real-world examples would be useful.
+ For more rapid testing and a unified interface,
+ fast model emulators for the provided real-world examples would be useful.
  This is left for future work.
 \end_layout
 
 \begin_layout Standard
-A step further into the future is comparable to Atari computer game playing
- artificial intelligences 
+A step further into the future is comparable to Atari computer game playing artificial intelligences 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "Bellemare2012"
@@ -2019,8 +2215,9 @@ literal "false"
 
 \begin_layout Acknowledgement
 I thank Frederik Beaujean for insightful conversations.
- I thank Gana Moharram, who studied the IceCube neutrino analysis for a
- bachelor thesis with Philipp Eller, for insightful conversations.
+ I thank Gana Moharram,
+ who studied the IceCube neutrino analysis for a bachelor thesis with Philipp Eller,
+ for insightful conversations.
 \end_layout
 
 \begin_layout Standard
@@ -2070,25 +2267,19 @@ Cosmology with the Cosmic Microwave Background
 \end_layout
 
 \begin_layout Standard
-(if you are a cosmologist, please help me with references!)
+(if you are a cosmologist,
+ please help me with references!)
 \end_layout
 
 \begin_layout Standard
-The Cosmic Microwave Background (CMB) is the oldest electromagnetic signal
- observable.
- It originated when the Universe underwent a transition from being so dense
- that photons would be constantly scattered to the current state where photons
- can travel freely.
- These photons allow us to measure the temperature of their regions of origin
- approximately 379,000 years after the Big Bang.
- A map of their emission over the sky gives information about the temperature
- correlation.
- This carries information of how the Big Bang inflation proceeded, which
- is dependent on important constituents of the Universe, such as the baryonic
- matter and dark matter content of the Universe.
- The CMB remains one of the most important experiments to measure cosmological
- parameters in the dark energy and cold dark matter cosmology framework
- (
+The Cosmic Microwave Background (CMB) is the oldest electromagnetic signal observable.
+ It originated when the Universe underwent a transition from being so dense that photons would be constantly scattered to the current state where photons can travel freely.
+ These photons allow us to measure the temperature of their regions of origin approximately 379,000 years after the Big Bang.
+ A map of their emission over the sky gives information about the temperature correlation.
+ This carries information of how the Big Bang inflation proceeded,
+ which is dependent on important constituents of the Universe,
+ such as the baryonic matter and dark matter content of the Universe.
+ The CMB remains one of the most important experiments to measure cosmological parameters in the dark energy and cold dark matter cosmology framework (
 \begin_inset Formula $\Lambda$
 \end_inset
 
@@ -2097,8 +2288,7 @@ CDM).
 \begin_inset Formula $\Lambda$
 \end_inset
 
-CDM to the CMB is that the prediction of angular correlations is computationally
- expensive (of the order of a few seconds per likelihood evaluation).
+CDM to the CMB is that the prediction of angular correlations is computationally expensive (of the order of a few seconds per likelihood evaluation).
 \end_layout
 
 \begin_layout Standard
@@ -2112,8 +2302,7 @@ status open
 
 \begin_layout Plain Layout
 
-https://github.com/JohannesBuchner/montepython_public/blob/3.5/input/example_ns.par
-am
+https://github.com/JohannesBuchner/montepython_public/blob/3.5/input/example_ns.param
 \end_layout
 
 \end_inset
@@ -2150,31 +2339,39 @@ https://github.com/brinckmann/montepython_public/
 \begin_inset Formula $\Lambda$
 \end_inset
 
-CDM cosmological parameters, namely the baryonic density 
+CDM cosmological parameters,
+ namely the baryonic density 
 \begin_inset Formula $\Omega_{\mathrm{b}}$
 \end_inset
 
- (between 1.8 and 3), the dark matter density 
+ (between 1.8 and 3),
+ the dark matter density 
 \begin_inset Formula $\Omega_{\mathrm{cdm}}$
 \end_inset
 
- (between 0.1 and 0.2), the scalar spectral index 
+ (between 0.1 and 0.2),
+ the scalar spectral index 
 \begin_inset Formula $n_{s}$
 \end_inset
 
- (between 0.9 and 1.1), 
+ (between 0.9 and 1.1),
+ 
 \begin_inset Formula $A_{s}$
 \end_inset
 
- (between 1.8 and 3), the hubble parameter value, relative to 
+ (between 1.8 and 3),
+ the hubble parameter value,
+ relative to 
 \begin_inset Formula $100\,\mathrm{km/s/Mpc}$
 \end_inset
 
-, 
+,
+ 
 \begin_inset Formula $h$
 \end_inset
 
- (between 0.6 and 0.8), and the time of reionisation 
+ (between 0.6 and 0.8),
+ and the time of reionisation 
 \begin_inset Formula $\tau_{\mathrm{reion}}$
 \end_inset
 
@@ -2187,10 +2384,10 @@ Gravitational wave analysis
 \end_layout
 
 \begin_layout Standard
-Gravitational waves originate from distortions of space-time by compact
- objects.
- Recently, the development of multiple, extremely sensitive instruments
- have allowed the observation of two black holes merging.
+Gravitational waves originate from distortions of space-time by compact objects.
+ Recently,
+ the development of multiple,
+ extremely sensitive instruments have allowed the observation of two black holes merging.
  GW170817 
 \begin_inset CommandInset citation
 LatexCommand citep
@@ -2199,9 +2396,8 @@ literal "true"
 
 \end_inset
 
- was the first gravitational event detected by three detectors and allowed
- for the first time localisation on the sky, albeit with substantial parameter
- degeneracies.
+ was the first gravitational event detected by three detectors and allowed for the first time localisation on the sky,
+ albeit with substantial parameter degeneracies.
 \end_layout
 
 \begin_layout Standard
@@ -2216,8 +2412,7 @@ status open
 
 \begin_layout Plain Layout
 
-https://github.com/gwastro/PyCBC-Tutorials/blob/7f5ff8fdd40c5dce2237b6082e1755b4a
-ba9b989/tutorial/inference_1_ModelsAndPEByHand.ipynb
+https://github.com/gwastro/PyCBC-Tutorials/blob/7f5ff8fdd40c5dce2237b6082e1755b4aba9b989/tutorial/inference_1_ModelsAndPEByHand.ipynb
 \end_layout
 
 \end_inset
@@ -2240,20 +2435,24 @@ literal "false"
 \begin_inset Formula $q$
 \end_inset
 
-, the chirp mass 
+,
+ the chirp mass 
 \begin_inset Formula $m_{\mathrm{chirp}}$
 \end_inset
 
-, which is a combination of the two masses that influences the signal amplitude,
+,
+ which is a combination of the two masses that influences the signal amplitude,
  the inclination 
 \begin_inset Formula $i$
 \end_inset
 
- of the system relative to the observer, the time of coalescence 
+ of the system relative to the observer,
+ the time of coalescence 
 \begin_inset Formula $t_{c}$
 \end_inset
 
- in seconds, the distance 
+ in seconds,
+ the distance 
 \begin_inset Formula $d$
 \end_inset
 
@@ -2261,7 +2460,8 @@ literal "false"
 \begin_inset Formula $RA$
 \end_inset
 
-, 
+,
+ 
 \begin_inset Formula $DEC$
 \end_inset
 
@@ -2287,8 +2487,7 @@ where
 \begin_inset Formula $t_{m}$
 \end_inset
 
- is the time automatically associated by an automated pipeline searching
- for candidate events in the noise.
+ is the time automatically associated by an automated pipeline searching for candidate events in the noise.
 \end_layout
 
 \begin_layout Subsection
@@ -2296,8 +2495,8 @@ Atmospheric Neutrino Oscillations from IceCube
 \end_layout
 
 \begin_layout Standard
-IceCube is a neutrino detector near the south pole, which has collected
- atmospheric neutrino data 
+IceCube is a neutrino detector near the south pole,
+ which has collected atmospheric neutrino data 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "Aartsen2018,Aartsen2018,2019PhRvD..99c2007A,Aartsen2020"
@@ -2317,8 +2516,7 @@ status open
 
 \begin_layout Plain Layout
 
-https://github.com/icecube/pisa/blob/f91224b58360ee9ecefe4bdb232249263c9eee17/pis
-a_examples/IceCube_3y_oscillations_example.ipynb
+https://github.com/icecube/pisa/blob/f91224b58360ee9ecefe4bdb232249263c9eee17/pisa_examples/IceCube_3y_oscillations_example.ipynb
 \end_layout
 
 \end_inset
@@ -2328,8 +2526,9 @@ a_examples/IceCube_3y_oscillations_example.ipynb
 
 \end_inset
 
- applied to three-year IceCube data, where the muon and neutrinos model
- predicts a 2d-histogrammed signal, which is compared to collected data.
+ applied to three-year IceCube data,
+ where the muon and neutrinos model predicts a 2d-histogrammed signal,
+ which is compared to collected data.
  The parameters are adopted from the PISA defaults:
 \end_layout
 
@@ -2364,10 +2563,9 @@ Gamma-rays from the Crab pulsar-wind nebula
 \end_layout
 
 \begin_layout Standard
-The Crab nebula is the brightest astrophysical source in the sky at high
- energies.
- The Large-Area Telescope (LAT) onboard Fermi has observed emission from
- the region, which is a super-position of the Crab Pulsar (PSR J0534+2200),
+The Crab nebula is the brightest astrophysical source in the sky at high energies.
+ The Large-Area Telescope (LAT) onboard Fermi has observed emission from the region,
+ which is a super-position of the Crab Pulsar (PSR J0534+2200),
  and synchrotron and Inverse Compton emission from the Crab Nebular.
  We follow the tutorial 
 \begin_inset Foot
@@ -2411,7 +2609,8 @@ super_cutoff_powerlaw
 \begin_inset space ~
 \end_inset
 
-J0534+2200, the normalisation for the power law spectrum of NVSS
+J0534+2200,
+ the normalisation for the power law spectrum of NVSS
 \begin_inset space ~
 \end_inset
 
@@ -2435,8 +2634,8 @@ J0544.4+2238 (log-uniform from
 \begin_inset Formula $1.39\times10^{-13}$
 \end_inset
 
-), and the isotropic background normalization and the galactic background
- factor.
+),
+ and the isotropic background normalization and the galactic background factor.
  
 \end_layout
 
@@ -2445,7 +2644,8 @@ Exoplanet transit observations
 \end_layout
 
 \begin_layout Standard
-Photometric light curves of stars can show small, periodic dips in brightness,
+Photometric light curves of stars can show small,
+ periodic dips in brightness,
  which are interpreted as transits of exoplanets in front of the star.
  We follow the tutorial of the juliet package
 \begin_inset Foot
@@ -2468,8 +2668,7 @@ https://juliet.readthedocs.io/en/latest/tutorials/transitfits.html#transit-fits
 
 \end_inset
 
- to analyse HATS-46 light curve observed with the Transiting Exoplanet Survey
- Satellite 
+ to analyse HATS-46 light curve observed with the Transiting Exoplanet Survey Satellite 
 \begin_inset CommandInset citation
 LatexCommand citep
 after "for details"
@@ -2480,8 +2679,7 @@ literal "false"
 \end_inset
 
 .
- The model is essentially a constant light curve modified by a U-shaped
- dip that repeats with some period.
+ The model is essentially a constant light curve modified by a U-shaped dip that repeats with some period.
  We use juliet 
 \begin_inset CommandInset citation
 LatexCommand citep
@@ -2490,7 +2688,8 @@ literal "false"
 
 \end_inset
 
- for the implementation, which in turn uses batman 
+ for the implementation,
+ which in turn uses batman 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "Kreidberg2015"
@@ -2511,10 +2710,14 @@ literal "false"
 
 \begin_layout Standard
 The model parameters include the properties of the planet (period P in days,
- time-of-transit center t0, planet-to-star radius ratio p, eccentricity
- ecc, argument of periastron passage omega), as well as nuisance parameters
- (dilution factor mdilution, offset relative flux mflux, jitter sigma, Limb-dark
-ening parameters q1 and q2):
+ time-of-transit center t0,
+ planet-to-star radius ratio p,
+ eccentricity ecc,
+ argument of periastron passage omega),
+ as well as nuisance parameters (dilution factor mdilution,
+ offset relative flux mflux,
+ jitter sigma,
+ Limb-darkening parameters q1 and q2):
 \end_layout
 
 \begin_layout Standard
@@ -2545,6 +2748,8 @@ Exoplanet detection from Radial Velocity data
 
 \begin_layout Standard
 \begin_inset Float figure
+placement document
+alignment document
 wide true
 sideways false
 status open
@@ -2583,21 +2788,18 @@ Exoplanet Doppler shift time series data (blue).
 \end_layout
 
 \begin_layout Standard
-One of the most efficient ways to detect exoplanets is through changes in
- the line-of-sight (radial) velocity of individual stars, as the tug of
- planets gravitationally accelerates them (Doppler shift).
+One of the most efficient ways to detect exoplanets is through changes in the line-of-sight (radial) velocity of individual stars,
+ as the tug of planets gravitationally accelerates them (Doppler shift).
  A planetary system leads to a complex overlay of periodic velocity changes.
- Additionally, the measurement of velocities is uncertain, in part because
- of the instrument accuracy and precision, and in part because the spectral
- emission lines used to measure Doppler shifts can be unstable due to stellar
- activity.
- That latter process has been modeled with Gaussian processes in recent
- years.
+ Additionally,
+ the measurement of velocities is uncertain,
+ in part because of the instrument accuracy and precision,
+ and in part because the spectral emission lines used to measure Doppler shifts can be unstable due to stellar activity.
+ That latter process has been modeled with Gaussian processes in recent years.
 \end_layout
 
 \begin_layout Standard
-Here we adopt the problem setup of the Extreme Precision Radial Velocity
- III challenge
+Here we adopt the problem setup of the Extreme Precision Radial Velocity III challenge
 \begin_inset Foot
 status open
 
@@ -2629,12 +2831,14 @@ literal "false"
 .
  They simulated several artificial exoplanet systems containing two planets,
  with a Gaussian process and realistic observation time sampling.
- The challenge participants were asked to compute the Bayesian marginal
- likelihoods of each data set assuming that the true number of planets was
- 0, 1, 2 or 3.
- Participants did not know the true simulation input, but they were told
- the exact Gaussian noise properties, which follows a Gaussian process.
- Here we repeat this exercise, for their dataset 5 (shown in Figure
+ The challenge participants were asked to compute the Bayesian marginal likelihoods of each data set assuming that the true number of planets was 0,
+ 1,
+ 2 or 3.
+ Participants did not know the true simulation input,
+ but they were told the exact Gaussian noise properties,
+ which follows a Gaussian process.
+ Here we repeat this exercise,
+ for their dataset 5 (shown in Figure
 \begin_inset space ~
 \end_inset
 
@@ -2642,6 +2846,7 @@ literal "false"
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:Sine-data-1"
+nolink "false"
 
 \end_inset
 
@@ -2655,11 +2860,15 @@ literal "false"
 \end_inset
 
 .
- Essentially, it is similar to a sine time series fit, except that the periodic
- signal can be asymmetric due to ellipticity, giving 5 parameters per planet
- (signal amplitude, period, pericenter time, eccentricity and mean anomaly)
- that describe a Keplerian orbit.
- Additionally, the white noise amplitude 
+ Essentially,
+ it is similar to a sine time series fit,
+ except that the periodic signal can be asymmetric due to ellipticity,
+ giving 5 parameters per planet (signal amplitude,
+ period,
+ pericenter time,
+ eccentricity and mean anomaly) that describe a Keplerian orbit.
+ Additionally,
+ the white noise amplitude 
 \begin_inset Formula $\sigma_{j}$
 \end_inset
 
@@ -2667,7 +2876,8 @@ literal "false"
 \begin_inset Formula $C$
 \end_inset
 
- are free parameters, giving 
+ are free parameters,
+ giving 
 \begin_inset Formula $2+N_{\mathrm{planets}}\times5$
 \end_inset
 
@@ -2684,7 +2894,8 @@ literal "false"
 
 \end_inset
 
- for the implementation, which in turn uses RadVel 
+ for the implementation,
+ which in turn uses RadVel 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "Fulton2018"
@@ -2708,27 +2919,29 @@ X-ray spectral analysis of Active Galactic Nuclei
 \end_layout
 
 \begin_layout Standard
-Active Galactic Nuclei (AGN) are regions in the centres of massive galaxies
- where super-massive black holes grow.
- As gas swirls into the black hole, enormous amounts of radiation are produced
- by release of gravitational energy, sometimes shining brighter than all
- host galaxy stars together.
- Close to the black hole, X-rays are also produced and are an important
- tracer of the mass inflow into the black hole.
- They also allow identifying AGN in the sky, even when the black hole is
- surrounded by thick gas and dust, as most of the energetic X-rays penetrate
- through any obscurers.
- Space-based X-ray focusing instruments allow measurements of the X-ray
- spectra, which carry information on the AGN luminosity, obscuring column
- density and properties of the X-ray emitter (photon index, energy turn-over).
- The detection of X-ray radiation is performed by counting photon events
- and capturing an estimate of their energy, time of arrival and location
- on the sky.
- However, the energy response and energy-dependent sensitivity of the instrument
- adds some analysis complexity.
- Additionally, when few counts are detected per energy bin, as is commonly
- the case, the process needs to be modelled with a Poisson likelihood.
- For more details, see 
+Active Galactic Nuclei (AGN) are regions in the centres of massive galaxies where super-massive black holes grow.
+ As gas swirls into the black hole,
+ enormous amounts of radiation are produced by release of gravitational energy,
+ sometimes shining brighter than all host galaxy stars together.
+ Close to the black hole,
+ X-rays are also produced and are an important tracer of the mass inflow into the black hole.
+ They also allow identifying AGN in the sky,
+ even when the black hole is surrounded by thick gas and dust,
+ as most of the energetic X-rays penetrate through any obscurers.
+ Space-based X-ray focusing instruments allow measurements of the X-ray spectra,
+ which carry information on the AGN luminosity,
+ obscuring column density and properties of the X-ray emitter (photon index,
+ energy turn-over).
+ The detection of X-ray radiation is performed by counting photon events and capturing an estimate of their energy,
+ time of arrival and location on the sky.
+ However,
+ the energy response and energy-dependent sensitivity of the instrument adds some analysis complexity.
+ Additionally,
+ when few counts are detected per energy bin,
+ as is commonly the case,
+ the process needs to be modelled with a Poisson likelihood.
+ For more details,
+ see 
 \begin_inset CommandInset citation
 LatexCommand citet
 key "Buchner2014"
@@ -2748,8 +2961,8 @@ literal "false"
 \end_layout
 
 \begin_layout Standard
-Here, we include the source of a Chandra deep observation (source ID 179)
- presented 
+Here,
+ we include the source of a Chandra deep observation (source ID 179) presented 
 \begin_inset CommandInset citation
 LatexCommand citet
 key "Buchner2014"
@@ -2816,9 +3029,9 @@ literal "false"
 \end_inset
 
 .
- The intrinsic X-ray emission is a powerlaw, which is modulated by a physical
- obscurer model simulation of photo-electric absorption, Compton-scattering
- and fluorescent line-emission 
+ The intrinsic X-ray emission is a power law,
+ which is modulated by a physical obscurer model simulation of photo-electric absorption,
+ Compton-scattering and fluorescent line-emission 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "Buchner2019a"
@@ -2848,10 +3061,10 @@ https://github.com/JohannesBuchner/xars/blob/master/doc/uxclumpy.rst
 \end_inset
 
 .
- To this obscured AGN model, a soft, unobscured powerlaw is added.
- The background spectrum is added and its normalisation determined simultaneousl
-y with a joint fit of the spectrum extracted in a background sky region
- and the source+background spectrum extracted at the source location.
+ To this obscured AGN model,
+ a soft,
+ unobscured power law is added.
+ The background spectrum is added and its normalisation determined simultaneously with a joint fit of the spectrum extracted in a background sky region and the source+background spectrum extracted at the source location.
  The model has four parameters.
  This includes a wide log-uniform prior (between 
 \begin_inset Formula $10^{-8}$
@@ -2861,7 +3074,8 @@ y with a joint fit of the spectrum extracted in a background sky region
 \begin_inset Formula $10^{-3}$
 \end_inset
 
-) on the powerlaw normalisation, a wide log-uniform prior (between 
+) on the power law normalisation,
+ a wide log-uniform prior (between 
 \begin_inset Formula $10^{-7}$
 \end_inset
 
@@ -2869,10 +3083,10 @@ y with a joint fit of the spectrum extracted in a background sky region
 \begin_inset Formula $10^{-1}$
 \end_inset
 
-) on the soft power law normalisation relative to the primary powerlaw normalisa
-tion, intrinsic power law, a Gaussian prior on the power law photon index
- with mean 1.95 and standard deviation 0.15, a log-uniform prior on the obscurer
- column density between 
+) on the soft power law normalisation relative to the primary power law normalisation,
+ intrinsic power law,
+ a Gaussian prior on the power law photon index with mean 1.95 and standard deviation 0.15,
+ a log-uniform prior on the obscurer column density between 
 \begin_inset Formula $10^{20}$
 \end_inset
 
@@ -2888,11 +3102,9 @@ Superluminous supernova
 \end_layout
 
 \begin_layout Standard
-Super-Luminous Supernovae (SLSN) are extreme explosions at the end of stellar
- evolution.
- By fitting photometric observations over time, the explosion mechanism
- and its physical parameters can be determined (and distinguished from other
- transients).
+Super-Luminous Supernovae (SLSN) are extreme explosions at the end of stellar evolution.
+ By fitting photometric observations over time,
+ the explosion mechanism and its physical parameters can be determined (and distinguished from other transients).
  We follow the tutorial of MOSFiT 
 \begin_inset Foot
 status open
@@ -2914,7 +3126,9 @@ https://mosfit.readthedocs.io/en/latest/fitting.html#public-data
 
 \end_inset
 
-, to analyse LSQ12dlf, with two models described in 
+,
+ to analyse LSQ12dlf,
+ with two models described in 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Nicholl2017"
@@ -2922,9 +3136,8 @@ literal "false"
 
 \end_inset
 
-: a magnetar engine with a simple spectral energy distribution (`magnetar`
- model) and a magnetar with a modified spectrum and additional constraints
- (`slsn` model).
+:
+ a magnetar engine with a simple spectral energy distribution (`magnetar` model) and a magnetar with a modified spectrum and additional constraints (`slsn` model).
  The parameters are:
 \end_layout
 
@@ -2949,7 +3162,8 @@ literal "false"
 
 \end_inset
 
-In case of `slsn`, the following parameters differ:
+In case of `slsn`,
+ the following parameters differ:
 \begin_inset Formula 
 \begin{align*}
 \mathrm{Bfield} & \sim & \mathrm{Uniform}(0.1,\,10)\\
@@ -2972,13 +3186,13 @@ Gamma-ray burst
 \end_layout
 
 \begin_layout Plain Layout
-The Gamma-ray burst 080916C was detected by the Gamma-ray Burst Monitor
- (GBM) onboard Fermi.
- The burst was very bright, allowing time-resolved analysis of the gamma-ray
- spectrum.
- In this analysis, the light curve was first split into time segments.
- Each segment is fit with an empirical bending spectral function, which
- has the following parameters to control the low and high-energy slopes,
+The Gamma-ray burst 080916C was detected by the Gamma-ray Burst Monitor (GBM) onboard Fermi.
+ The burst was very bright,
+ allowing time-resolved analysis of the gamma-ray spectrum.
+ In this analysis,
+ the light curve was first split into time segments.
+ Each segment is fit with an empirical bending spectral function,
+ which has the following parameters to control the low and high-energy slopes,
  the knee location in energy and flux normalisation:
 \end_layout
 
@@ -3006,13 +3220,17 @@ Lennard-Jones potential
 \end_layout
 
 \begin_layout Standard
-In material science, the group behaviour of atoms gives rise to structures
- and phases of matter (solids, liquids, gases, crystals, metals, etc).
- A standard example is the Lennard-Jones potential, which we adopt here
- with 6 particles in a box.
- Pairs of particles feel two forces, a repulsive force at short distances
- (Pauli repulsion) and an attractive force at longer distances (van der
- Waals force).
+In material science,
+ the group behaviour of atoms gives rise to structures and phases of matter (solids,
+ liquids,
+ gases,
+ crystals,
+ metals,
+ etc).
+ A standard example is the Lennard-Jones potential,
+ which we adopt here with 6 particles in a box.
+ Pairs of particles feel two forces,
+ a repulsive force at short distances (Pauli repulsion) and an attractive force at longer distances (van der Waals force).
  This are formulated as:
 \end_layout
 
@@ -3036,7 +3254,8 @@ where
 \begin_inset Formula $j$
 \end_inset
 
-, but at least 
+,
+ but at least 
 \begin_inset Formula $\sigma$
 \end_inset
 
@@ -3045,27 +3264,29 @@ where
 \begin_inset Formula $\sigma=10^{-3}$
 \end_inset
 
-, which defines the scale at which particles feel attraction or repulsion.
+,
+ which defines the scale at which particles feel attraction or repulsion.
  
 \end_layout
 
 \begin_layout Standard
-Each particle's three-dimensional location (x,y,z) is a free parameter between
- -1 and +1.
- To avoid identical modes, we set the likelihood to zero when 
+Each particle's three-dimensional location (x,y,z) is a free parameter between -1 and +1.
+ To avoid identical modes,
+ we set the likelihood to zero when 
 \begin_inset Formula $|z_{1}|<|z_{2}|<...<|z_{n}|$
 \end_inset
 
  is not satisfied.
- Due to translation symmetry, we assume the first particle is placed in
- the coordinate centre (0,0,0).
- From rotation symmetry, we assume the second particle is placed along the
- positive z direction (0,0,
+ Due to translation symmetry,
+ we assume the first particle is placed in the coordinate centre (0,0,0).
+ From rotation symmetry,
+ we assume the second particle is placed along the positive z direction (0,0,
 \begin_inset Formula $z_{2}$
 \end_inset
 
 ).
- From a second rotation symmetry, the third particle is placed on the (0,
+ From a second rotation symmetry,
+ the third particle is placed on the (0,
 \begin_inset Formula $y_{3}$
 \end_inset
 
@@ -3078,13 +3299,13 @@ Each particle's three-dimensional location (x,y,z) is a free parameter between
 \end_layout
 
 \begin_layout Subsection
-Power-law line fit: Tully-Fisher relation
+Power-law line fit:
+ Tully-Fisher relation
 \end_layout
 
 \begin_layout Standard
-Stars in the centres of galaxies move akin to a ideal gas, so that the velocity
- dispersion of galactic central elliptical components (bulges) correlates
- with the bulge mass.
+Stars in the centres of galaxies move akin to a ideal gas,
+ so that the velocity dispersion of galactic central elliptical components (bulges) correlates with the bulge mass.
  
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -3123,10 +3344,11 @@ https://johannesbuchner.github.io/UltraNest/example-line.html
 
 \end_inset
 
- of UltraNest, we assume these correspond to Gaussian tails, scaled according
- to the error bar size.
- The measurements are fit with a powerlaw, with the intrinsic scatter along
- the powerlaw accounted for by a log-Normal distribution.
+ of UltraNest,
+ we assume these correspond to Gaussian tails,
+ scaled according to the error bar size.
+ The measurements are fit with a power law,
+ with the intrinsic scatter along the power law accounted for by a log-Normal distribution.
  The parameters are
 \end_layout
 
@@ -3140,13 +3362,15 @@ https://johannesbuchner.github.io/UltraNest/example-line.html
 
 \end_inset
 
-The likelihood is integrating the Log-Normal distribution over the data
- point distribution, i.e., it is a hierarchical Bayesian model.
+The likelihood is integrating the Log-Normal distribution over the data point distribution,
+ i.e.,
+ it is a hierarchical Bayesian model.
  This integration is performed numerically.
 \end_layout
 
 \begin_layout Subsection
-Sample distributions: A galaxy without dark matter
+Sample distributions:
+ A galaxy without dark matter
 \end_layout
 
 \begin_layout Subsubsection
@@ -3161,12 +3385,14 @@ literal "false"
 
 \end_inset
 
- observed the velocity of globular clusters in a low-mass, ultra-diffuse
- galaxy.
- The width of the (Gaussian) distribution of velocities, i.e., the velocity
- dispersion, is directly related to the total galaxy mass.
- From comparing the stellar light to the total light, they inferred that
- the dark matter mass in this galaxy is negligible.
+ observed the velocity of globular clusters in a low-mass,
+ ultra-diffuse galaxy.
+ The width of the (Gaussian) distribution of velocities,
+ i.e.,
+ the velocity dispersion,
+ is directly related to the total galaxy mass.
+ From comparing the stellar light to the total light,
+ they inferred that the dark matter mass in this galaxy is negligible.
  Following 
 \begin_inset Foot
 status open
@@ -3187,8 +3413,10 @@ https://johannesbuchner.github.io/UltraNest/example-intrinsic-distribution.html
 
 \end_inset
 
-, we analyse their velocity measurements with Gaussian error bars, assuming
- a Gaussian sample distribution (see e.g., 
+,
+ we analyse their velocity measurements with Gaussian error bars,
+ assuming a Gaussian sample distribution (see e.g.,
+ 
 \begin_inset CommandInset citation
 LatexCommand citealp
 key "Baronchelli2018"
@@ -3197,11 +3425,12 @@ literal "false"
 \end_inset
 
  for such a Gaussian hierarchical model in astronomy).
- The parameters are the mean, for which we assume a uniform distribution
- between -100 and 100 km/s, and the scatter, for which we assume a log-uniform
- distribution between 1 and 1000 km/s.
- The parameter for each data point's true value is integrated out, as implemente
-d in 
+ The parameters are the mean,
+ for which we assume a uniform distribution between -100 and 100 km/s,
+ and the scatter,
+ for which we assume a log-uniform distribution between 1 and 1000 km/s.
+ The parameter for each data point's true value is integrated out,
+ as implemented in 
 \begin_inset Foot
 status open
 
@@ -3229,7 +3458,8 @@ Dirichlet sample distribution
 \end_layout
 
 \begin_layout Standard
-The above example is repeated, but with a more flexible sample distribution.
+The above example is repeated,
+ but with a more flexible sample distribution.
  Following the PosteriorStacker tutorial
 \begin_inset Foot
 status open
@@ -3250,8 +3480,9 @@ https://github.com/JohannesBuchner/PosteriorStacker
 
 \end_inset
 
-, a uniform Dirichlet distribution is adopted, with 11 uniformly spaced
- bins between -80 km/s and +80 km/s.
+,
+ a uniform Dirichlet distribution is adopted,
+ with 11 uniformly spaced bins between -80 km/s and +80 km/s.
  This analysis allows checking whether a Gaussian was a reasonable model.
 \end_layout
 
@@ -3272,6 +3503,8 @@ Sine time series
 
 \begin_layout Standard
 \begin_inset Float figure
+placement document
+alignment document
 wide false
 sideways false
 status open
@@ -3310,9 +3543,8 @@ Sine time series data (orange) with generating two-component model.
 \end_layout
 
 \begin_layout Standard
-Analyses of inhomogeneously sampled light curves is a common problem in
- astrophysics, sometimes with complex noise processes and semi-periodic
- signals.
+Analyses of inhomogeneously sampled light curves is a common problem in astrophysics,
+ sometimes with complex noise processes and semi-periodic signals.
  Here we present a simple multi-component sine signal as a toy problem,
  and uniformly randomly sample observing times.
  The problem is defined as:
@@ -3340,6 +3572,7 @@ Figure
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:Sine-data"
+nolink "false"
 
 \end_inset
 
@@ -3351,7 +3584,8 @@ reference "fig:Sine-data"
 \begin_inset Formula $M=40$
 \end_inset
 
- data points, generated by sampling 
+ data points,
+ generated by sampling 
 \begin_inset Formula $n_{\mathrm{comp}}=2$
 \end_inset
 
@@ -3359,23 +3593,28 @@ reference "fig:Sine-data"
 \begin_inset Formula $m_{0}=-5$
 \end_inset
 
-, measurement uncertainty 
+,
+ measurement uncertainty 
 \begin_inset Formula $\sigma=0.1$
 \end_inset
 
-, amplitudes 
+,
+ amplitudes 
 \begin_inset Formula $A_{1}=0.25$
 \end_inset
 
-, 
+,
+ 
 \begin_inset Formula $A_{2}=0.05$
 \end_inset
 
-, periods 
+,
+ periods 
 \begin_inset Formula $P_{1}=180$
 \end_inset
 
-, 
+,
+ 
 \begin_inset Formula $P_{2}=44$
 \end_inset
 
@@ -3383,7 +3622,8 @@ reference "fig:Sine-data"
 \begin_inset Formula $\phi_{1}=0$
 \end_inset
 
-, 
+,
+ 
 \begin_inset Formula $\phi_{2}=1\,\mathrm{rad}$
 \end_inset
 
@@ -3392,8 +3632,8 @@ reference "fig:Sine-data"
 \begin_inset Formula $n_{\mathrm{comp}}=0,\,1,\,2,\,3$
 \end_inset
 
-, producing two to eleven dimensional problems with completely exchangable
- components.
+,
+ producing two to eleven dimensional problems with completely exchangable components.
 \end_layout
 
 \begin_layout Subsection
@@ -3402,6 +3642,8 @@ Low X-ray count observations of a Compton-thick AGN
 
 \begin_layout Standard
 \begin_inset Float figure
+placement document
+alignment document
 wide true
 sideways false
 status collapsed
@@ -3427,12 +3669,12 @@ name "fig:xraydata"
 \end_inset
 
 X-ray spectrum with the true generating model.
- The total model (blue curve) is a sum of two powerlaws, one altered by
- a exponential truncation towards the low-energy side.
- That model is multiplied by the instrument sensitivity (gray curve), and
- background contamination (red) is added.
- The final model is shown in blue, from which poisson data are drawn (green
- crosses).
+ The total model (blue curve) is a sum of two power laws,
+ one altered by a exponential truncation towards the low-energy side.
+ That model is multiplied by the instrument sensitivity (gray curve),
+ and background contamination (red) is added.
+ The final model is shown in blue,
+ from which poisson data are drawn (green crosses).
 \end_layout
 
 \end_inset
@@ -3446,8 +3688,7 @@ X-ray spectrum with the true generating model.
 \end_layout
 
 \begin_layout Standard
-This mock problem (`xrayspectrum`) describes a 5-dimensional degenerate
- physical parameter space discussed in 
+This mock problem (`xrayspectrum`) describes a 5-dimensional degenerate physical parameter space discussed in 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Buchner2014"
@@ -3464,6 +3705,7 @@ literal "false"
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:xraydata"
+nolink "false"
 
 \end_inset
 
@@ -3484,24 +3726,29 @@ with background amplitude
 \begin_inset Formula $B$
 \end_inset
 
-, signal amplitude 
+,
+ signal amplitude 
 \begin_inset Formula $A$
 \end_inset
 
-, spectral photon index 
+,
+ spectral photon index 
 \begin_inset Formula $\Gamma$
 \end_inset
 
-, obscuring column density 
+,
+ obscuring column density 
 \begin_inset Formula $N_{H}$
 \end_inset
 
-, and fraction of the powerlaw that escapes unobscured 
+,
+ and fraction of the power law that escapes unobscured 
 \begin_inset Formula $f_{\mathrm{scat}}$
 \end_inset
 
 .
- The instrument sensitivity peaks near 2keV: 
+ The instrument sensitivity peaks near 2keV:
+ 
 \begin_inset Formula $A_{LE}(E)=\exp\left\{ -\left|\frac{E-2\mathrm{keV}}{2\mathrm{keV}}\right|\right\} $
 \end_inset
 
@@ -3517,7 +3764,8 @@ This model shows a degeneracy when
 \begin_inset Formula $B$
 \end_inset
 
-, because high 
+,
+ because high 
 \begin_inset Formula $N_{H}$
 \end_inset
 
@@ -3529,7 +3777,7 @@ This model shows a degeneracy when
 \begin_inset Formula $N_{H}=0$
 \end_inset
 
- (a simple powerlaw).
+ (a simple power law).
  The model is illustrated in Figure
 \begin_inset space ~
 \end_inset
@@ -3538,6 +3786,7 @@ This model shows a degeneracy when
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:xraydata"
+nolink "false"
 
 \end_inset
 
@@ -3582,7 +3831,8 @@ name "subsec:Toy-problems"
 \end_layout
 
 \begin_layout Standard
-In this section, the prior is the unit hypercube (
+In this section,
+ the prior is the unit hypercube (
 \begin_inset Formula $0<\theta_{i}<1$
 \end_inset
 
@@ -3590,8 +3840,10 @@ In this section, the prior is the unit hypercube (
 \begin_inset Formula $1\leq i\leq d$
 \end_inset
 
-), unless specified otherwise.
- If analytically known, the marginal parameter posterior distribution 
+),
+ unless specified otherwise.
+ If analytically known,
+ the marginal parameter posterior distribution 
 \begin_inset Formula $p(\theta_{i}|D)$
 \end_inset
 
@@ -3608,9 +3860,8 @@ Asymmetric Gaussian
 
 \begin_layout Standard
 Integration of a Gaussian distribution is a standard test problem.
- The variation here introduces some parameter inequality and spreads the
- means in a sine pattern, so that the posterior is not at the center of
- the prior range.
+ The variation here introduces some parameter inequality and spreads the means in a sine pattern,
+ so that the posterior is not at the center of the prior range.
 \end_layout
 
 \begin_layout Standard
@@ -3639,7 +3890,8 @@ This problem is evaluated using uniform priors on
 \begin_inset Formula $10^{-1}$
 \end_inset
 
-), 
+),
+ 
 \begin_inset Formula $16$
 \end_inset
 
@@ -3664,6 +3916,7 @@ This problem is evaluated using uniform priors on
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:pairwise-posterior"
+nolink "false"
 
 \end_inset
 
@@ -3673,7 +3926,8 @@ reference "fig:pairwise-posterior"
 \begin_inset Formula $p(\theta_{i}|D)=\mathrm{Normal}(\mu_{i},\sigma_{i}^{2})$
 \end_inset
 
-, and the marginal likelihood 
+,
+ and the marginal likelihood 
 \begin_inset Formula $Z\approx1$
 \end_inset
 
@@ -3685,10 +3939,9 @@ Beta product
 \end_layout
 
 \begin_layout Standard
-Diverse test problems can be generated by combining standard one-dimensional
- probability distributions.
- Here, the Beta distribution is used to represent diverse posterior shapes
- in each parameter:
+Diverse test problems can be generated by combining standard one-dimensional probability distributions.
+ Here,
+ the Beta distribution is used to represent diverse posterior shapes in each parameter:
 \end_layout
 
 \begin_layout Standard
@@ -3699,7 +3952,8 @@ L & = & \prod_{i=1}^{d}\mathrm{Beta}(a_{i},b_{i})
 
 \end_inset
 
-with fixed, known 
+with fixed,
+ known 
 \begin_inset Formula $a$
 \end_inset
 
@@ -3707,7 +3961,8 @@ with fixed, known
 \begin_inset Formula $b$
 \end_inset
 
-, randomly generated as:
+,
+ randomly generated as:
 \end_layout
 
 \begin_layout Standard
@@ -3727,19 +3982,21 @@ This distribution can produce multiple modes (where
 \begin_inset Formula $b_{i}<1$
 \end_inset
 
-), non-Gaussian tails.
- The likelihood is relatively uninformative on each parameter (completely
- non-informative when 
+),
+ non-Gaussian tails.
+ The likelihood is relatively uninformative on each parameter (completely non-informative when 
 \begin_inset Formula $a_{i}=b_{i}=0$
 \end_inset
 
 ).
- We test this problem in 2, 10 and 30 dimensions.
+ We test this problem in 2,
+ 10 and 30 dimensions.
  The true marginal posteriors are given by 
 \begin_inset Formula $P(\theta_{i}|D)=\mathrm{Beta}(a_{i},b_{i})$
 \end_inset
 
-, and the marginal likelihood is 
+,
+ and the marginal likelihood is 
 \begin_inset Formula $Z=1$
 \end_inset
 
@@ -3751,8 +4008,7 @@ Correlated Funnel
 \end_layout
 
 \begin_layout Standard
-Neil's funnel is a standard test problem that represents features of hierarchica
-l Bayesian models.
+Neil's funnel is a standard test problem that represents features of hierarchical Bayesian models.
  It is a normal distribution with the standard deviation also a free parameter.
  This causes a funnel shape (see middle panel of Figure
 \begin_inset space ~
@@ -3762,13 +4018,12 @@ l Bayesian models.
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:pairwise-posterior"
+nolink "false"
 
 \end_inset
 
 ) involving all parameters.
- Such non-affine correlations can sometimes be eased significantly by reparametr
-izations which scale the unknown mean parameters by the standard deviation
- parameter 
+ Such non-affine correlations can sometimes be eased significantly by reparametrizations which scale the unknown mean parameters by the standard deviation parameter 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Betancourt2013"
@@ -3802,8 +4057,8 @@ L & = & \prod_{i}\mathrm{Normal}(\mu_{i}-\gamma\times\mu_{i-1},\Sigma^{2})\\
 
 \end_inset
 
-This problem is tested in 2, 10 and 50 dimensions with correlation strength
- 
+This problem is tested in 2,
+ 10 and 50 dimensions with correlation strength 
 \begin_inset Formula $\gamma=0.95$
 \end_inset
 
@@ -3812,11 +4067,13 @@ This problem is tested in 2, 10 and 50 dimensions with correlation strength
 \begin_inset Formula $p(\mu_{i}|D)=\mathrm{Normal}(0,1)$
 \end_inset
 
-, 
+,
+ 
 \begin_inset Formula $p(\ln\mu_{i}|D)=\mathrm{Normal}(0,1)$
 \end_inset
 
-, and the marginal likelihood 
+,
+ and the marginal likelihood 
 \begin_inset Formula $Z\approx1$
 \end_inset
 
@@ -3829,8 +4086,8 @@ Rosenbrock function
 
 \begin_layout Standard
 The Rosenbrock function is a standard test problem in optimization.
- It exhibits a non-linear, narrow degeneracy that can be difficult to navigate
- (right middle panel of Figure
+ It exhibits a non-linear,
+ narrow degeneracy that can be difficult to navigate (right middle panel of Figure
 \begin_inset space ~
 \end_inset
 
@@ -3838,6 +4095,7 @@ The Rosenbrock function is a standard test problem in optimization.
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:pairwise-posterior"
+nolink "false"
 
 \end_inset
 
@@ -3870,7 +4128,8 @@ literal "true"
 
 \end_inset
 
-We test this problem in 2, 20 and 50 dimensions.
+We test this problem in 2,
+ 20 and 50 dimensions.
 \end_layout
 
 \begin_layout Subsection
@@ -3886,7 +4145,8 @@ literal "false"
 
 \end_inset
 
- exhibits multi-modality and heavy tails, which lead to non-elliptical contours.
+ exhibits multi-modality and heavy tails,
+ which lead to non-elliptical contours.
 \end_layout
 
 \begin_layout Standard
@@ -3905,12 +4165,14 @@ L & = & L_{1}\times L_{2}\times\prod_{i=3}^{d}d_{i}(x_{i})
 
 \end_inset
 
-We test this problem in 2, 10 and 30 dimensions.
+We test this problem in 2,
+ 10 and 30 dimensions.
  The true marginal posteriors are given by 
 \begin_inset Formula $P(x_{1}|D)=L_{1}(x_{1})$
 \end_inset
 
-, and the marginal likelihood is 
+,
+ and the marginal likelihood is 
 \begin_inset Formula $Z=1$
 \end_inset
 
@@ -3926,8 +4188,7 @@ AR(1) process
 \end_layout
 
 \begin_layout Plain Layout
-A first-order auto-regressive process (AR(1)) can be used as a test problem
- of correlated parameters:
+A first-order auto-regressive process (AR(1)) can be used as a test problem of correlated parameters:
 \end_layout
 
 \begin_layout Plain Layout
@@ -3940,7 +4201,8 @@ L & = & \mathrm{Normal}(x_{1},1)\prod_{i=1}^{d-1}\mathrm{Normal}(\mu_{i+1}-\alph
 
 \end_inset
 
-We test this problem in 2, 10 and 25 dimensions.
+We test this problem in 2,
+ 10 and 25 dimensions.
 \end_layout
 
 \end_inset
@@ -3953,8 +4215,7 @@ Eggbox
 \end_layout
 
 \begin_layout Standard
-The eggbox function is a two-dimensional extremely multi-modal function
- (bottom left panel of Figure
+The eggbox function is a two-dimensional extremely multi-modal function (bottom left panel of Figure
 \begin_inset space ~
 \end_inset
 
@@ -3962,6 +4223,7 @@ The eggbox function is a two-dimensional extremely multi-modal function
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:pairwise-posterior"
+nolink "false"
 
 \end_inset
 
@@ -3973,7 +4235,9 @@ literal "false"
 
 \end_inset
 
-, defined as: 
+,
+ defined as:
+ 
 \end_layout
 
 \begin_layout Standard
@@ -3993,8 +4257,9 @@ Box
 \end_layout
 
 \begin_layout Standard
-This is a flat distribution at the corner of the parameter space, placed
- on top of a wide, unimportant Gaussian distribution:
+This is a flat distribution at the corner of the parameter space,
+ placed on top of a wide,
+ unimportant Gaussian distribution:
 \end_layout
 
 \begin_layout Standard
@@ -4005,7 +4270,8 @@ This is a flat distribution at the corner of the parameter space, placed
 
 \end_inset
 
-Here, 
+Here,
+ 
 \begin_inset Formula $\delta=\max_{i}|\theta_{i}|$
 \end_inset
 
@@ -4027,8 +4293,9 @@ We test this problem in
 \begin_inset Formula $P(\theta_{i}|D)=\mathrm{Uniform}(0,0.1)$
 \end_inset
 
-, and the marginal likelihood is 
-\begin_inset Formula $\ln Z\approx100+(0.1)^{d}$
+,
+ and the marginal likelihood is 
+\begin_inset Formula $Z\approx100+(0.1)^{d}$
 \end_inset
 
 .
@@ -4040,19 +4307,21 @@ Spike and slab
 \end_layout
 
 \begin_layout Standard
-The spike and slab problem is a mixture of two gaussians, one with a wide
- standard deviation, one with a narrow standard deviation.
+The spike and slab problem is a mixture of two Gaussians,
+ one with a wide standard deviation,
+ one with a narrow standard deviation.
  This leads to a strong phase transition.
- The narrower gaussian has standard deviation 
+ The narrower Gaussian has standard deviation 
 \begin_inset Formula $\sigma_{2}=f^{-\frac{1}{d}}$
 \end_inset
 
-, and is shifted by 
+,
+ and is shifted by 
 \begin_inset Formula $\Delta$
 \end_inset
 
  in each direction.
- The wider gaussian has standard deviation 
+ The wider Gaussian has standard deviation 
 \begin_inset Formula $\sigma_{1}=1$
 \end_inset
 
@@ -4067,7 +4336,8 @@ L_{2} & = & \frac{1}{1+w_{1}}\prod_{i}\frac{1}{2\pi\sigma_{2}^{2}}\exp\left\{ -\
 
 \end_inset
 
-We use a two-dimensional setup, with the two Gaussians co-located 
+We use a two-dimensional setup,
+ with the two Gaussians co-located 
 \begin_inset Formula $\Delta=0$
 \end_inset
 
@@ -4076,21 +4346,31 @@ We use a two-dimensional setup, with the two Gaussians co-located
 \begin_inset Formula $w_{1}$
 \end_inset
 
- values of 1, 40, 1000, and for 
+ values of 1,
+ 40,
+ 1000,
+ and for 
 \begin_inset Formula $\sigma_{2}$
 \end_inset
 
- adopt 4, 40, 400 or 4000.
+ adopt 4,
+ 40,
+ 400 or 4000.
  This gives 16 mono-modal toy problems with phase transitions.
- Secondly, we adopt offset values for 
+ Secondly,
+ we adopt offset values for 
 \begin_inset Formula $\Delta$
 \end_inset
 
- of 1, 2, 4, 10 with weights 
+ of 1,
+ 2,
+ 4,
+ 10 with weights 
 \begin_inset Formula $w_{1}$
 \end_inset
 
- of 1, 40 or 1000.
+ of 1,
+ 40 or 1000.
  This gives another 8 (bimodal) toy problems.
  The problems are named 
 \begin_inset Quotes eld
@@ -4129,8 +4409,8 @@ The true evidence is
 \begin_inset Formula $\sigma_{2}$
 \end_inset
 
- is small, and the true marginals are the superposition of the two weighted
- Gaussians.
+ is small,
+ and the true marginals are the superposition of the two weighted Gaussians.
  
 \end_layout
 
