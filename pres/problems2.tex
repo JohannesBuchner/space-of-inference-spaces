@@ -25,12 +25,13 @@
 
 \usepackage{babel}
 \begin{document}
-\title{A space of parameter spaces in the space sciences}
+\title{A space of inference spaces in the space sciences}
 \subtitle{Parametric Bayesian inference in astronomy, cosmology and particle
 physics}
 \abstract{A sample of parametric Bayesian inference applications from astronomy,
 cosmology and particle physics is studied, augmented by mock data
-sets and toy problems. The parameter spaces and posterior distributions
+sets and toy problems. The parameter spaces of these parametric physical
+models and their posterior distributions from analysing specific data
 are characterized by (1) the number of model parameters, (2) whether
 the posterior shape is similar to a Gaussian, (3) whether the posterior
 has light or heavy tails, (4) how small the posterior is compared
@@ -55,37 +56,50 @@ of use, a Docker compute image is provided.}
 
 \section{Introduction}
 
-Fitting parametric models to experimental data is one of the key methods
-to infer physical parameters. In physics, investigation of distant
-processes is possible by modelling the measurement process accurately.
-Here, we focus on problems where the model has continuous parameters
-with predefined prior ranges, and where a likelihood function has
-been defined to compare the model prediction to data. Some examples
-include fitting the power spectrum of the Cosmic Microwave Background
-(CMB) with Dark Energy and Cold Dark Matter ($\Lambda$CDM) cosmologies,
-fitting time series of the radial velocity of a host star gravitationally
-pulled by its exoplanets, dissecting multiple components in spectra
+Fitting parametric models to experimental or observational data is
+a central method for estimating physical parameters within a specified
+statistical model \citep{Dose2003,vonDerLinden2014}. Bayesian data
+analysis combines probability models, prior information, and likelihood
+functions to quantify parameter uncertainty and compare competing
+models \citep{Loredo2024}. In astronomy and other observational sciences,
+physical properties are often inferred indirectly from remotely sensed
+data. Accurate modelling of the measurement process, including signal
+formation, instrumental filtering, noise, calibration uncertainties,
+and other nuisance parameters, is therefore essential for obtaining
+stable and physically meaningful inferences \citet{Craig1986,Loredo2024,Feigelson2020}.
+Some examples include fitting the power spectrum of the Cosmic Microwave
+Background (CMB) with Dark Energy and Cold Dark Matter ($\Lambda$CDM)
+cosmologies \citep[e.g.,][]{Trotta2008}, fitting time series of the
+radial velocity of a host star gravitationally pulled by its exoplanets
+\citep[e.g.,][]{Ford2007}, dissecting multiple components in spectra
 and population inference from uncertain measurements of many individual
-objects, such as luminosity or mass functions. The plausible ranges
-of model parameters that match the data are typically tested in a
-Bayesian framework once prior and likelihood are specified with Monte
-Carlo samplers.
+objects, such as luminosity or mass functions. The probably ranges
+of model parameters inferred from observationally data are often tested
+in a Bayesian framework, once prior and likelihood are specified,
+by employing Monte Carlo samplers.
 
 Monte Carlo sampling methods of varying complexity have been developed
-over the last decades. This includes variations of Markov Chain Monte
-Carlo (MCMC), Sequential Monte Carlo (SMC), importance samplers (IS)
-and nested sampling (NS). Specific implementations specify the initialisation,
-exploration strategy (e.g., proposal function) and termination criterion.
-These are often tuned for the application. Reliable parameter recovery
-of a method can be tested by Monte Carlo simulating new datasets,
-and analysing them. An alternative is to use toy inference problems
-that approximate features of the real problem. These can be more easily
-understood and more rapidly analysed. Given the diversity of algorithms
-and inference problems, it is interesting to consider whether a different
-algorithm can perform well on the same problem, and whether the currently
-used algorithm can be transferred to another problem. This work is
-focusing on the applicability of Monte Carlo Samplers over different
-types of inference problems.
+over several decades. These include importance sampling (IS), Markov
+chain Monte Carlo (MCMC), nested sampling and sequential Monte Carlo
+(SMC), among other methods \citep{Hesterberg2002,Skilling2004,Bardenet2013}.
+Specific implementations of these algorithms can differ in their initialization,
+exploration strategy, proposal or transition mechanism, adaptation
+scheme, and termination or convergence criteria \citep{Neal2011,Tierney1994,Dai2022,Buchner2021c,Ashton2022}.
+The choice and tuning of these components depend on the target distribution
+and the computational characteristics of the application, such as
+dimensionality, dependence between parameters, multimodality, and
+the availability of parallel computation. The reliability of parameter
+recovery can be assessed by simulating datasets from a model with
+known parameters and then applying the inference procedure to those
+datasets \citep{Talts2018,Direnzo2023}. A complementary strategy
+is to deliberately construct toy inference problems that reproduce
+selected features of the real problem while being easier to understand
+and faster to analyse. Because inference problems differ substantially
+in their structure, it is useful to compare different algorithms on
+the same problem. A preliminary step towards a holistic understanding
+of Monte Carlo samplers is to identify similarities and differences
+of inference problems. It is the aim of this work to provide one (not
+necessarily unique) quantification of the space of inference problems.
 
 Inference problems differ substantially by the posterior distribution
 that a Monte Carlo sampler has to explore. The main characteristics
@@ -208,6 +222,7 @@ work.
 \subsection{Non-Gaussianity}
 
 \begin{figure*}
+
 \includegraphics[width=1\textwidth]{/mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/evaluateproblems_volcurve}
 
 \caption{\protect\label{fig:volcurve}Probability fraction enclosed as a function
@@ -301,6 +316,7 @@ We cap this value to at most $\mathrm{IE}=100$.
 \subsection{Phase transitions}
 
 \begin{figure}
+
 \includegraphics[width=1\columnwidth]{phasetransition}
 
 \caption{\protect\label{fig:phasetransition}In the prior volume - likelihood
@@ -377,6 +393,7 @@ illustrated in the right panel of Figure~\ref{fig:degeneracy-viz-example},
 the off-diagonal elements are zero.
 
 \begin{figure*}
+
 \includegraphics[viewport=0bp 0bp 1120bp 1136bp,width=1\textwidth]{/mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/exoplanet-rvs_0005.txt-1/ultranest-safe/simplified_posterior}
 
 \caption{\protect\label{fig:corner-example-1}Corner plot \citep[created with corner.py;][]{Foreman-Mackey2016}
@@ -387,6 +404,7 @@ while others are very well constrained.}
 
 \begin{figure}
 \begin{centering}
+
 \includegraphics[viewport=0bp 0bp 294bp 297bp,width=0.8\columnwidth]{/mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/exoplanet-rvs_0005.txt-1/ultranest-safe/correlations}
 \par\end{centering}
 \caption{\protect\label{fig:degeneracy-viz-example}Proposed visualisation
@@ -401,6 +419,7 @@ from white to darker colors. Here, some parameters are uninformative
 while others are highly informative.}
 
 \begin{centering}
+
 \includegraphics[viewport=0bp 0bp 299bp 297bp,width=0.8\columnwidth]{/mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/asymgauss-16d/ultranest-fast-fixed4d/correlations}
 \par\end{centering}
 \caption{Same as Figure~\ref{fig:degeneracy-viz-example}, but for our 16
@@ -423,6 +442,7 @@ information loss, (9) phase transition.}
 \end{table*}
 
 \begin{figure*}
+
 \includegraphics[viewport=0bp 0bp 1045bp 1001bp,width=1\linewidth]{/mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/evaluateproblems}
 
 \caption{\protect\label{fig:Models}Parameter space of the problems over the
@@ -433,11 +453,23 @@ defined six characteristics.}
 \section{Results}
 
 \begin{figure*}
-\includegraphics[viewport=0bp 0bp 294bp 297bp,width=0.5\columnwidth]{/mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/cmb-cosmology/ultranest-safe/correlations}\includegraphics[viewport=0bp 0bp 294bp 297bp,width=0.5\columnwidth]{/mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/ligo/ultranest-fast-fixed4d/correlations}\includegraphics[viewport=0bp 0bp 294bp 297bp,width=0.5\columnwidth]{/mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/icecube/ultranest-safe/correlations}\includegraphics[viewport=0bp 0bp 294bp 297bp,width=0.5\columnwidth]{/mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/crab/ultranest/correlations}
 
-\includegraphics[viewport=0bp 0bp 294bp 297bp,width=0.5\columnwidth]{/mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/transit/ultranest-safe/correlations}\includegraphics[viewport=0bp 0bp 294bp 297bp,width=0.5\columnwidth]{/mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/exoplanet-rvs_0005.txt-2/ultranest-fast-fixed4d/correlations}\includegraphics[viewport=0bp 0bp 294bp 297bp,width=0.5\columnwidth]{/mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/mosfit-LSQ12dlf/ultranest/correlations}\includegraphics[viewport=0bp 0bp 294bp 297bp,width=0.5\columnwidth]{/mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/mosfit-LSQ12dlf-magnetar/ultranest/correlations}
+\includegraphics[viewport=0bp 0bp 294bp 297bp,width=0.5\columnwidth]{/mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/cmb-cosmology/ultranest-safe/correlations}
+\includegraphics[viewport=0bp 0bp 294bp 297bp,width=0.5\columnwidth]{/mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/ligo/ultranest-fast-fixed4d/correlations}
+\includegraphics[viewport=0bp 0bp 294bp 297bp,width=0.5\columnwidth]{/mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/icecube/ultranest-safe/correlations}
+\includegraphics[viewport=0bp 0bp 294bp 297bp,width=0.5\columnwidth]{/mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/crab/ultranest/correlations}
 
-\includegraphics[viewport=0bp 0bp 294bp 297bp,width=0.5\columnwidth]{/mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/xrayagnspec/ultranest-safe/correlations}\includegraphics[viewport=0bp 0bp 294bp 297bp,width=0.5\columnwidth]{/mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/line/ultranest-safe/correlations}\includegraphics[viewport=0bp 0bp 294bp 297bp,width=0.5\columnwidth]{/mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/posteriorstacker/posteriorstacker-gauss/correlations}\includegraphics[viewport=0bp 0bp 294bp 297bp,width=0.5\columnwidth]{/mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/posteriorstacker/posteriorstacker-flex11/correlations}
+
+\includegraphics[viewport=0bp 0bp 294bp 297bp,width=0.5\columnwidth]{/mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/transit/ultranest-safe/correlations}
+\includegraphics[viewport=0bp 0bp 294bp 297bp,width=0.5\columnwidth]{/mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/exoplanet-rvs_0005.txt-2/ultranest-fast-fixed4d/correlations}
+\includegraphics[viewport=0bp 0bp 294bp 297bp,width=0.5\columnwidth]{/mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/mosfit-LSQ12dlf/ultranest/correlations}
+\includegraphics[viewport=0bp 0bp 294bp 297bp,width=0.5\columnwidth]{/mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/mosfit-LSQ12dlf-magnetar/ultranest/correlations}
+
+
+\includegraphics[viewport=0bp 0bp 294bp 297bp,width=0.5\columnwidth]{/mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/xrayagnspec/ultranest-safe/correlations}
+\includegraphics[viewport=0bp 0bp 294bp 297bp,width=0.5\columnwidth]{/mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/line/ultranest-safe/correlations}
+\includegraphics[viewport=0bp 0bp 294bp 297bp,width=0.5\columnwidth]{/mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/posteriorstacker/posteriorstacker-gauss/correlations}
+\includegraphics[viewport=0bp 0bp 294bp 297bp,width=0.5\columnwidth]{/mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/systematiclogs/posteriorstacker/posteriorstacker-flex11/correlations}
 
 \caption{\protect\label{fig:Posterior-structure-visualisatio}Posterior structure
 visualisations (see section~\ref{subsec:Compact-visualisation-of})
@@ -451,6 +483,7 @@ the bottom left panel shows strong non-linear degeneracies.}
 \end{figure*}
 
 \begin{figure}
+
 \includegraphics[viewport=0bp 0bp 391bp 442bp,width=1\columnwidth]{/mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/evaluateproblems_spacestructure}
 
 \caption{\protect\label{fig:corr}For each problem, the evolution of the Pearson
@@ -570,20 +603,20 @@ It is interesting to firstly try to understand in which regions of
 the parameter space an inference algorithm gives reliable results.
 This is achievable with problems where the truth is known (toy problems
 or generated data sets). Only a subsequent step is performance comparison
-among reliable algorithms. To this end, we point out a few guidelines
-for comparing Bayesian samplers fairly. Initially, the full sample
-of problems presented here should be considered. If only a subset
-is of interest, this should be clearly and transparently stated (e.g.,
-focus on low-dimensional inference problems, on mono-modal inference
-problems, etc.). It is a trivial statement that with more compute
-budget, a better accuracy and reliability can be achieved. Therefore,
-we recommend plotting bias or accuracy against computational cost
-for each algorithm and runtime. One quantifier of computational cost
-is the number of (likelihood) model evaluations or wall-clock time.
-The former is suitable for computationally challenging likelihoods,
-the latter is more relevant for computationally cheap models paired
-with algorithms that require costly training (such as deep neural
-networks). 
+among reliable algorithms. While the performance comparison is beyond
+the scope of this work, we point out a few guidelines for comparing
+Bayesian samplers fairly. Initially, the full sample of problems presented
+here should be considered. If only a subset is of interest, this should
+be clearly and transparently stated (e.g., focus on low-dimensional
+inference problems, on mono-modal inference problems, etc.). It is
+a trivial statement that with more compute budget, a better accuracy
+and reliability can be achieved. Therefore, we recommend plotting
+bias or accuracy against computational cost for each algorithm and
+runtime. One quantifier of computational cost is the number of (likelihood)
+model evaluations or wall-clock time. The former is suitable for computationally
+challenging likelihoods, the latter is more relevant for computationally
+cheap models paired with algorithms that require costly training (such
+as deep neural networks).
 
 It remains to be defined how to quantify the fidelity of the computation.
 To quantify posterior fidelity, see for example the probability-probability
@@ -706,7 +739,7 @@ pipeline searching for candidate events in the noise.
 \subsection{Atmospheric Neutrino Oscillations from IceCube}
 
 IceCube is a neutrino detector near the south pole, which has collected
-atmospheric neutrino data \citep{Aartsen2018,Aartsen2018,2019PhRvD..99c2007A,Aartsen2020}
+atmospheric neutrino data \citep{Aartsen2018,Aartsen2019,Jia2019,Aartsen2020}
 that can be studied for neutrino oscillation. Here we adopt a tutorial
 example of the PISA IceCube analysis package\cprotect\footnote{based on \url{https://github.com/icecube/pisa/blob/f91224b58360ee9ecefe4bdb232249263c9eee17/pisa_examples/IceCube_3y_oscillations_example.ipynb}}
 applied to three-year IceCube data, where the muon and neutrinos model
@@ -788,6 +821,7 @@ flux mflux, jitter sigma, Limb-darkening parameters q1 and q2):
 \subsection{Exoplanet detection from Radial Velocity data}
 
 \begin{figure*}
+
 \includegraphics[width=1\columnwidth]{/home/user/Downloads/integration-problem-set/exoplanet/rvs_0005\lyxdot txt}
 
 \caption{\protect\label{fig:Sine-data-1}Exoplanet Doppler shift time series
@@ -985,6 +1019,7 @@ whether a Gaussian was a reasonable model.
 \subsection{Sine time series}
 
 \begin{figure}
+
 \includegraphics[width=1\columnwidth]{sine}
 
 \caption{\protect\label{fig:Sine-data}Sine time series data (orange) with
@@ -1017,6 +1052,7 @@ to eleven dimensional problems with completely exchangable components.
 \subsection{Low X-ray count observations of a Compton-thick AGN}
 
 \begin{figure*}
+
 \includegraphics[width=1\columnwidth]{../xrayspectrum}
 
 \caption{\protect\label{fig:xraydata}X-ray spectrum with the true generating

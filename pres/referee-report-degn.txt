@@ -1,0 +1,47 @@
+This is about your paper "A space of inference spaces in the space 
+sciences", https://arxiv.org/abs/2608.06078. I downloaded the reference 
+outputs linked in the README of 
+JohannesBuchner/space-of-inference-spaces and regenerated Table 1 with 
+evaluateproblems.py.
+
+The archive on the MPE server is cut off. It is 3,746,656,851 bytes 
+long, gzip reports an unexpected end of file, and the listing stops 
+inside asymgauss-100d. I fetched the last megabyte a second time and it 
+is identical, so the file ends that way on the server. It holds 
+complete outputs for 23 of the 60 problems in problems.txt. 
+asymgauss-100d lacks its points.hdf5, and the remaining toy problems 
+are missing entirely, among them all 24 spike-and-slab variants.
+
+For the 23 problems that are there, six of the eight columns come out 
+identical to the last printed digit: dimensionality, cost, depth, 
+width, inequality and phase transition.
+
+The other two columns change from run to run. The number of modes and 
+the non-Gaussianity are both computed from the equally weighted 
+samples, and resample_equal draws those without a fixed seed. For 
+exo-rv-3, three runs gave 9, 6 and 15 modes, and the Results section 
+builds on the 9 ("Fitting for 3 exoplanets yields 9 modes"). Five runs 
+gave a non-Gaussianity between 0.05 and 0.16 for the same problem, 
+where Table 1 has 0.06. Your joblib cache keeps the first draw on your 
+machine, which is presumably why it never showed. With 
+np.random.seed(0) set before the run, two runs from an empty cache 
+agreed in all eight columns on the four problems I tried.
+
+The non-Gaussianity has a second issue. 
+compute_gaussian_approximation_loss evaluates the Gaussian at 
+samples[i] but pairs it with the weight and logL of weighted point i. 
+Because samples[i] is a resampled copy, it is never point i itself. 
+Every sample is an exact copy of a weighted point, so each can be given 
+its own logL. Done that way, the value is stable across seeds and moves 
+in several rows, for sample-dist-gauss from 0.08 to 0.13 and for 
+exo-rv-3 from 0.06 to 0.13.
+
+Two small things besides. In two rows the paper and the committed 
+evaluateproblems.tex disagree on the non-Gaussianity. For 
+sample-dist-hist the paper prints 0.12 and the file has 0.08, and my 
+runs give about 0.09. For rosenbrock-20d the paper prints 0.09 and the 
+file has 1.27, which I could not recompute because that problem is 
+missing from the archive. The other 58 rows of Table 1 match the 
+committed file exactly. And lines 37 and 38 of the README swap the two 
+posteriorstacker folders. problems.txt has them right, since flex11 is 
+the one with eleven bin parameters.

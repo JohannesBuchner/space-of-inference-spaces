@@ -34,8 +34,8 @@ Physics
 * materials Lennard-Jones potential with 6 particles systematiclogs/LJ6/
 * gravitational-waves ligo-GW: systematiclogs/ligo/ultranest-fast-fixed4d/
 * extragalactic line: systematiclogs/line/ultranest-safe/ 
-* extragalactic gaussdist: systematiclogs/posteriorstacker/posteriorstacker-flex11/ 
 * extragalactic histdist: systematiclogs/posteriorstacker/posteriorstacker-gauss/ 
+* extragalactic gaussdist: systematiclogs/posteriorstacker/posteriorstacker-flex11/ 
 
 
 Mock data

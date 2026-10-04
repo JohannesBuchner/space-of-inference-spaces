@@ -704,20 +704,34 @@ def get_cost(folder):
     return np.nanmedian(data[-1000:])
 
 
-def compute_gaussian_approximation_loss(eqsamples, prob, logL, problem_dimensionality):
-    cov = np.cov(eqsamples, rowvar=0)
-    mean = np.mean(eqsamples, axis=0)
+def compute_gaussian_approximation_loss(problem_dimensionality, upoints, weights, logL):
+    """
+    Parameters
+    ----------
+    upoints: array of shape (N, d)
+        Weighted posterior samples in unit cube
+    weights: array of shape (N,)
+        Corresponding posterior weights
+    logL: array of shape (N,)
+        Corresponding log-likelihoods
+    problem_dimensionality: int
+    """
+    # Weighted mean and covariance
+    mean = np.average(upoints, weights=weights, axis=0)
+    delta = upoints - mean
+    cov = np.einsum('i,ij,ik->jk', weights, delta, delta)
+    cov /= weights.sum()  # already normalised if weights sum to 1
 
     # compute likelihood given that gaussian parameters
     a = np.linalg.inv(cov)
-    delta = eqsamples - mean
-    mahalanobis_distances = np.einsum('...i, ...i', np.tensordot(delta, a, axes=1), delta)
+    mahalanobis_distances = np.einsum('...i,ij,...j->...', delta, a, delta)
     logLgauss = -0.5 * mahalanobis_distances # - 0.5 * np.sum(np.log(np.pi * np.diag(cov)))
 
     # compute KL divergence:
     #    reference distribution is equally sampled. so prob = 1/N
     #    new distribution has probability logLgauss
-    surprise = np.sum(prob * (logL - logL.max() - logLgauss))
+    # weights[i], logL[i], logLgauss[i] all correspond to the same point upoints[i]
+    surprise = np.sum(weights * (logL - logL.max() - logLgauss))
 
     return np.abs(surprise) / problem_dimensionality
 
@@ -800,7 +814,7 @@ def count_posterior_modes(problem_name, eqsamples, problem_dimensionality):
                 cluster_assignment[cluster_assignment[selection_mask] == -1] == clusterid_target
                 # handle assigned ones
                 for clusterid in clusters:
-                    cluster_assignment[cluster_assignment == clusterid] == clusterid_target
+                    cluster_assignment[cluster_assignment == clusterid] = clusterid_target
 
         clusters = np.unique(cluster_assignment)
         nmodes = (clusters > -1).sum()
@@ -838,7 +852,9 @@ def trim_properties(problem_dimensionality,
 
 
 def evaluate_problem(problem_name, folder, sequence, results, livepoint_sequence):
-    
+
+    np.random.seed(0)  # Fix seed for reproducibility of resample_equal
+
     u = results['weighted_samples']['upoints']
     w = results['weighted_samples']['weights']
     IG = np.zeros(len(results['posterior']['information_gain_bits']))
@@ -866,7 +882,8 @@ def evaluate_problem(problem_name, folder, sequence, results, livepoint_sequence
 
     eqsamples = results['samples']
     visualise_problem(folder, problem_name, results, eqsamples)
-    problem_gaussianity = compute_gaussian_approximation_loss(eqsamples, prob, logL, problem_dimensionality)
+    problem_gaussianity = compute_gaussian_approximation_loss(
+        problem_dimensionality, u, prob, logL)
 
     # logstds = 0.5 * np.log10(np.diag(cov))
     # compute information gain for each parameter

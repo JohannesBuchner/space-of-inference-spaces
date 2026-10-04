@@ -1,0 +1,50 @@
+I have read the paper “A space of inference spaces in the space sciences”. Overall,
+I found it a useful and valuable addition to the literature that shows the diversity
+of targets encountered in statistical inference in physical sciences; classifies them
+by pathologies; and shows the performance of various computer packages on
+them. I think it could be improved by more careful definitions in some places,
+and more connections to existing literature. I liked the speculative remarks
+about the future: that providing these databases of problems could spur future
+developments.
+
+For existing literature,
+• posteriordb: see https://github.com/stan-dev/posteriordb and https:
+//proceedings.mlr.press/v258/magnusson25a.html
+• https://arxiv.org/abs/2605.30412
+• https://arxiv.org/abs/2409.18464
+• Referring explicitly to Simulation Based Calibration when you cite the Gelman et al paper
+• Refer to any standard measures of measures of modality, non-Gaussianity etc if they exist in the literature
+
+For the definitions of the pathologies,
+• Modes was based on density and thus isn’t invariant under reparameterization; what parameterization does this definition use? Is there a canonical way to define and count modes in high-dimensions sample-based representations of a density?
+• For non-Gaussianity, the statement of BvM theorem could be refined. While the measure of non-Gaussianity itself, the KL divergence, is independent of choice of prameterization, one must choose a parmaeterisation under which the reference measure is a Gaussian and under which one
+estimates the µ and Σ.
+• I had trouble with tail weight or width. I would have anticipated
+(V_{95}/V_5)^{1/d} for a characteristic measure of width; in log-space
+TW = (1/d) * log(V_{95}/V_5).
+This differs from the TW definition used in the paper. I’m confused about how this is supposed to interplay with the curse of dimensionality — in highdimensions, more and more probability mass lies away from the mode. The tail weight increases with dimensionality; the − log d term seems to try to prevent this. Should it? I think further discussion and justification of this as a measure of TW pathology would be helpful. 
+In any case, these mean be high-probability mass tails, but they aren’t necessarily heavy tails. As the author points out, heavy tails are characterizing by the rate of decay of the probability density.
+
+• For the phase transitions, a measure of the strength of the phase transition
+is introduced. I wondered if Fig. 3 was supposed to be log-likelihood
+and log-volume. In simulated annealing approaches, we expect posterior
+samples to be concentrated at
+d log L(X) / d logX = -1/β
+which for β = 1 gives the -1 gradient mentioning in the text. I could understand something like the difference between the area under the convex hull of the log L versus log X, and the area under of log L versus log X curve, as a measure of nonconvexity:
+\int log L(X) - (log L(X))^{hull} d log X
+There is even an analogy to thermodynamics here. We could measure the
+strength of a first-order phase transition for potential V by
+\int V (ϕ) - V^{hull}(ϕ) dϕ
+where hull indicates convex hull. In a first order phase transition, there is a
+barrier such that the potential is non-convex. And this is a measure of the size of area of that barrier, something like the height time width of the barrier.
+
+However, in the text we have (changing notation to avoid a clash):
+\frac{\int L(X)^{hull} dX}{\int L(X) dX}
+I find this one hard to understand or justify as a measure of the strength of a
+phase transition. Some more discussion here would be helpful.
+
+Similarly, inspired by thermodynamics, one could take ∆ log X — the distance
+between the two modes in a plot of the posterior P (log X).
+
+From AY25/26, I always sign my reviews,
+Andrew Fowlie

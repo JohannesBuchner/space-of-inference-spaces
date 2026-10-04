@@ -102,7 +102,7 @@
 \begin_body
 
 \begin_layout Title
-A space of parameter spaces in the space sciences
+A space of inference spaces in the space sciences
 \end_layout
 
 \begin_layout Subtitle
@@ -114,7 +114,7 @@ Parametric Bayesian inference in astronomy,
 A sample of parametric Bayesian inference applications from astronomy,
  cosmology and particle physics is studied,
  augmented by mock data sets and toy problems.
- The parameter spaces and posterior distributions are characterized by (1) the number of model parameters,
+ The parameter spaces of these parametric physical models and their posterior distributions from analysing specific data are characterized by (1) the number of model parameters,
  (2) whether the posterior shape is similar to a Gaussian,
  (3) whether the posterior has light or heavy tails,
  (4) how small the posterior is compared to the prior,
@@ -158,40 +158,121 @@ Introduction
 \end_layout
 
 \begin_layout Standard
-Fitting parametric models to experimental data is one of the key methods to infer physical parameters.
- In physics,
- investigation of distant processes is possible by modelling the measurement process accurately.
- Here,
- we focus on problems where the model has continuous parameters with predefined prior ranges,
- and where a likelihood function has been defined to compare the model prediction to data.
+Fitting parametric models to experimental or observational data is a central method for estimating physical parameters within a specified statistical model 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "Dose2003,vonDerLinden2014"
+literal "false"
+
+\end_inset
+
+.
+ Bayesian data analysis combines probability models,
+ prior information,
+ and likelihood functions to quantify parameter uncertainty and compare competing models 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "Loredo2024"
+literal "false"
+
+\end_inset
+
+.
+ In astronomy and other observational sciences,
+ physical properties are often inferred indirectly from remotely sensed data.
+ Accurate modelling of the measurement process,
+ including signal formation,
+ instrumental filtering,
+ noise,
+ calibration uncertainties,
+ and other nuisance parameters,
+ is therefore essential for obtaining stable and physically meaningful inferences 
+\begin_inset CommandInset citation
+LatexCommand citet
+key "Craig1986,Loredo2024,Feigelson2020"
+literal "false"
+
+\end_inset
+
+.
  Some examples include fitting the power spectrum of the Cosmic Microwave Background (CMB) with Dark Energy and Cold Dark Matter (
 \begin_inset Formula $\Lambda$
 \end_inset
 
-CDM) cosmologies,
- fitting time series of the radial velocity of a host star gravitationally pulled by its exoplanets,
+CDM) cosmologies 
+\begin_inset CommandInset citation
+LatexCommand citep
+before "e.g.,"
+key "Trotta2008"
+literal "false"
+
+\end_inset
+
+,
+ fitting time series of the radial velocity of a host star gravitationally pulled by its exoplanets 
+\begin_inset CommandInset citation
+LatexCommand citep
+before "e.g.,"
+key "Ford2007"
+literal "false"
+
+\end_inset
+
+,
  dissecting multiple components in spectra and population inference from uncertain measurements of many individual objects,
  such as luminosity or mass functions.
- The plausible ranges of model parameters that match the data are typically tested in a Bayesian framework once prior and likelihood are specified with Monte Carlo samplers.
+ The probably ranges of model parameters inferred from observationally data are often tested in a Bayesian framework,
+ once prior and likelihood are specified,
+ by employing Monte Carlo samplers.
 \end_layout
 
 \begin_layout Standard
-Monte Carlo sampling methods of varying complexity have been developed over the last decades.
- This includes variations of Markov Chain Monte Carlo (MCMC),
- Sequential Monte Carlo (SMC),
- importance samplers (IS) and nested sampling (NS).
- Specific implementations specify the initialisation,
- exploration strategy (e.g.,
- proposal function) and termination criterion.
- These are often tuned for the application.
- Reliable parameter recovery of a method can be tested by Monte Carlo simulating new datasets,
- and analysing them.
- An alternative is to use toy inference problems that approximate features of the real problem.
- These can be more easily understood and more rapidly analysed.
- Given the diversity of algorithms and inference problems,
- it is interesting to consider whether a different algorithm can perform well on the same problem,
- and whether the currently used algorithm can be transferred to another problem.
- This work is focusing on the applicability of Monte Carlo Samplers over different types of inference problems.
+Monte Carlo sampling methods of varying complexity have been developed over several decades.
+ These include importance sampling (IS),
+ Markov chain Monte Carlo (MCMC),
+ nested sampling and sequential Monte Carlo (SMC),
+ among other methods 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "Hesterberg2002,Skilling2004,Bardenet2013"
+literal "false"
+
+\end_inset
+
+.
+ Specific implementations of these algorithms can differ in their initialization,
+ exploration strategy,
+ proposal or transition mechanism,
+ adaptation scheme,
+ and termination or convergence criteria 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "Tierney1994,Neal2011,Dai2022,Buchner2021c,Ashton2022"
+literal "false"
+
+\end_inset
+
+.
+ The choice and tuning of these components depend on the target distribution and the computational characteristics of the application,
+ such as dimensionality,
+ dependence between parameters,
+ multimodality,
+ and the availability of parallel computation.
+ The reliability of parameter recovery can be assessed by simulating datasets from a model with known parameters and then applying the inference procedure to those datasets 
+\begin_inset CommandInset citation
+LatexCommand citep
+before "simulation-based calibration;"
+key "Talts2018,Direnzo2023"
+literal "false"
+
+\end_inset
+
+.
+ A complementary strategy is to deliberately construct toy inference problems that reproduce selected features of the real problem while being easier to understand and faster to analyse.
+ Because inference problems differ substantially in their structure,
+ it is useful to compare different algorithms on the same problem.
+ A preliminary step towards a holistic understanding of Monte Carlo samplers is to identify similarities and differences of inference problems.
+ It is the aim of this work to provide one (not necessarily unique) quantification of the space of inference problems.
 \end_layout
 
 \begin_layout Standard
@@ -499,9 +580,53 @@ nolink "false"
 \end_layout
 
 \begin_layout Standard
+In the literature,
+ a vast diversity of definitions exist.
+ Mixtures of Gaussian components can be fitted to samples,
+ and the needed number of components determined 
+\begin_inset CommandInset citation
+LatexCommand citep
+before "e.g.,"
+key "McLachlan1987,Keribin2000"
+literal "false"
+
+\end_inset
+
+.
+ However,
+ the number of mixture components may indicate skewness and heavytailed distributions rather than the number of modes,
+ which depends on component overlap and covariance structure 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "Ray2005"
+literal "false"
+
+\end_inset
+
+.
+ Given a smooth fitted density,
+ modality can be defined through local maxima or basins 
+\begin_inset CommandInset citation
+LatexCommand citep
+before "e.g."
+key "Genovese2016,chacon2019mixture"
+literal "false"
+
+\end_inset
+
+.
+ Here,
+ however,
+ we are primarily interested in low-probability regions that isolate high-probability regions from each other.
+ Such gaps are complex degeneracies that are physically interesting,
+ but also of practical interest,
+ as Monte Carlo samplers may find them difficult to traverse.
+ 
+\end_layout
+
+\begin_layout Standard
 To mathematically define multi-modality,
  a threshold criterion is needed to define disconnectedness.
- In principle any clustering algorithm can be used.
  For simplicity and reproducibility,
  we adopt a very simple,
  heuristic approach.
@@ -599,8 +724,7 @@ tail weight
 \end_layout
 
 \begin_layout Standard
-The Bernstein–von Mises theorem states that when the data are highly informative,
- the posterior is shaped like a multi-variate Gaussian.
+The Bernstein–von Mises theorem states that the posterior is shaped like a multi-variate Gaussian for many classes of models if the number of data is large.
  Then,
  Laplace's approximation of the posterior with a log-quadratic density function is justified.
  This can furthermore occur if the model is linear in its parameters,
@@ -630,6 +754,11 @@ The Gaussianity of a posterior can be easily measured through the surprise from 
 \end_inset
 
  of the posterior samples.
+ The result is dependent on the parameterisation.
+ We use posterior samples in the unit cube,
+ so that when the prior dominates,
+ regardless of the chosen prior distribution,
+ the posterior is not Gaussian but uniformly distributed.
  We then define the non-Gaussianity as:
  
 \begin_inset Formula 
@@ -651,6 +780,7 @@ In multi-modal cases,
 \end_inset
 
  is high.
+ 
 \end_layout
 
 \begin_layout Subsection
@@ -672,7 +802,7 @@ While the posterior may have ellipsoidal contours like a Gaussian,
  have thin or heavy tails.
  For example,
  when outliers are allowed (e.g.,
- in student-t distribution or explicit outlier modelling),
+ in Student-t distribution or explicit outlier modelling),
  the wings of the posterior can be wide.
  Some algorithms may be optimized for square-exponential declines.
  Another cause of heavy tails is when most data points are fitted well by one component,
@@ -896,13 +1026,7 @@ literal "false"
 
  to condensation of a water vapor into liquid water,
  where small temperature changes leads to a sudden change in volume.
- This can affect some inference techniques,
- because the relevant geometry of the (proposal) space before and after the transition is radically different.
- 
-\end_layout
-
-\begin_layout Standard
-We measure the presence and the impact of phase transitions.
+ In the thermodynamics analogy of Monte Carlo inference algorithms such as simulated annealing and nested sampling,
  
 \begin_inset CommandInset citation
 LatexCommand citet
@@ -911,7 +1035,30 @@ literal "false"
 
 \end_inset
 
- discussed that the slope of the likelihood-volume curve deviates strongly from a power law with index -1.
+ discussed that in phase transitions the slope of the likelihood-volume curve deviates strongly from a power law with index -1.
+ This can affect some inference techniques,
+ because the relevant geometry of the (proposal) space before and after the transition is radically different.
+ 
+\end_layout
+
+\begin_layout Standard
+Whether a phase transition is important and even experienced depends on the Monte Carlo algorithm.
+ Nested sampling needs to navigate phase transitions across the entire range of likelihood 
+\begin_inset Formula $L$
+\end_inset
+
+ values,
+ while Markov Chain Monte Carlo algorithms may primarily navigate the posterior bulk and thus be insensitive to low-
+\begin_inset Formula $L$
+\end_inset
+
+ phase transitions.
+ Here,
+ our aim is to focus on phase transitions that impact the bulk posterior.
+\end_layout
+
+\begin_layout Standard
+We measure the presence and the impact of phase transitions.
  Figure
 \begin_inset space ~
 \end_inset
@@ -950,7 +1097,7 @@ nolink "false"
 
 ,
  we compute the evidence,
- and consider the ratio as our phase transition indicator:
+ and consider the evidence ratio as our phase transition indicator:
 \begin_inset Formula 
 \[
 \Phi=\frac{\int L'(V)\,dV}{\int L(V)\,dV}
@@ -970,6 +1117,7 @@ Here the denominator with
 
 ,
  as described above.
+ This therefore measures the impact of the phase transition on the posterior weight.
  By construction,
  
 \begin_inset Formula $\Phi\geq1$
@@ -1791,7 +1939,35 @@ https://github.com/JohannesBuchner/space-of-inference-spaces/
 ,
  allowing researchers to test with identical priors and likelihoods.
  The parameter spaces and posterior distributions have been characterized and cast into a space of parametric inference spaces.
- 
+\end_layout
+
+\begin_layout Standard
+This work focused on inference in astrophysics implemented in the respective community-maintained packages.
+ A cross-disciplinary effort to compare the reliability of posterior distribution is posteriordb 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "Magnusson2021"
+literal "false"
+
+\end_inset
+
+,
+ which contains 147 posteriors of 120 models from diverse disciplines coded in Stan (and thus all differentiable).
+ In astrophysics,
+ several works have compared the performance of Monte Carlo inference algorithms 
+\begin_inset CommandInset citation
+LatexCommand citep
+before "e.g.,"
+key "Dunkley2005,Poppelaars2026,Albert2025"
+literal "false"
+
+\end_inset
+
+.
+ Typically,
+ there is a strong focus on toy problems and only one inference problem with real data from a particular sub-field.
+ In this work,
+ we focused on understanding the nature of parameter spaces encountered in inference across subfields of the space sciences.
 \end_layout
 
 \begin_layout Standard
@@ -2080,7 +2256,7 @@ literal "false"
 It is interesting to firstly try to understand in which regions of the parameter space an inference algorithm gives reliable results.
  This is achievable with problems where the truth is known (toy problems or generated data sets).
  Only a subsequent step is performance comparison among reliable algorithms.
- To this end,
+ While the performance comparison is beyond the scope of this work,
  we point out a few guidelines for comparing Bayesian samplers fairly.
  Initially,
  the full sample of problems presented here should be considered.
@@ -2096,7 +2272,6 @@ It is interesting to firstly try to understand in which regions of the parameter
  One quantifier of computational cost is the number of (likelihood) model evaluations or wall-clock time.
  The former is suitable for computationally challenging likelihoods,
  the latter is more relevant for computationally cheap models paired with algorithms that require costly training (such as deep neural networks).
- 
 \end_layout
 
 \begin_layout Standard
@@ -2224,8 +2399,9 @@ I thank Frederik Beaujean for insightful conversations.
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
 btprint "btPrintCited"
-bibfiles "../../../../../PostDoc/literature/stats,/mnt/data/daten/PostDoc/literature/agn"
+bibfiles "/mnt/data/daten/PostDoc/literature/agn,/mnt/data/daten/PostDoc/literature/stats"
 options "aa"
+encoding "default"
 
 \end_inset
 
@@ -2499,7 +2675,7 @@ IceCube is a neutrino detector near the south pole,
  which has collected atmospheric neutrino data 
 \begin_inset CommandInset citation
 LatexCommand citep
-key "Aartsen2018,Aartsen2018,2019PhRvD..99c2007A,Aartsen2020"
+key "Aartsen2018,Aartsen2019,Jia2019,Aartsen2020"
 literal "false"
 
 \end_inset
