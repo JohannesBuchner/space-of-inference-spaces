@@ -7,6 +7,7 @@
 \textclass aa
 \begin_preamble
 \titlerunning{A space of parameter spaces in the space sciences}
+\usepackage{xcolor}
 \end_preamble
 \options twocolumn,latin9
 \use_default_options false
@@ -34,15 +35,17 @@
 \output_sync 0
 \bibtex_command default
 \index_command default
+\float_placement class
+\float_alignment class
 \paperfontsize default
 \spacing single
-\use_hyperref false
+\use_hyperref true
 \pdf_bookmarks true
 \pdf_bookmarksnumbered false
 \pdf_bookmarksopen false
 \pdf_bookmarksopenlevel 1
 \pdf_breaklinks false
-\pdf_pdfborder false
+\pdf_pdfborder true
 \pdf_colorlinks false
 \pdf_backref false
 \pdf_pdfusetitle true
@@ -114,7 +117,7 @@ Parametric Bayesian inference in astronomy,
 A sample of parametric Bayesian inference applications from astronomy,
  cosmology and particle physics is studied,
  augmented by mock data sets and toy problems.
- The parameter spaces of these parametric physical models and their posterior distributions from analysing specific data are characterized by (1) the number of model parameters,
+ The parameter spaces of these parametric physical models and their posterior distributions from analysing specific data are characterised by (1) the number of model parameters,
  (2) whether the posterior shape is similar to a Gaussian,
  (3) whether the posterior has light or heavy tails,
  (4) how small the posterior is compared to the prior,
@@ -124,8 +127,8 @@ A sample of parametric Bayesian inference applications from astronomy,
  (6) whether the posterior has multiple,
  disconnected modes,
  and (7) whether the inference undergoes phase transitions.
- These axis define a parameter space of inference problems.
- We characterize each of the inference problems and observe that inference in astrophysics spans the entire parameter space,
+ These axes define a parameter space of inference problems.
+ We characterise each of the inference problems and observe that inference in astrophysics spans the entire parameter space,
  from low to high dimensionality,
  mono- to multi-modal,
  and a variety of complex distributions that range from uninformative to highly informative.
@@ -188,7 +191,7 @@ literal "false"
  and other nuisance parameters,
  is therefore essential for obtaining stable and physically meaningful inferences 
 \begin_inset CommandInset citation
-LatexCommand citet
+LatexCommand citep
 key "Craig1986,Loredo2024,Feigelson2020"
 literal "false"
 
@@ -221,7 +224,7 @@ literal "false"
 ,
  dissecting multiple components in spectra and population inference from uncertain measurements of many individual objects,
  such as luminosity or mass functions.
- The probably ranges of model parameters inferred from observationally data are often tested in a Bayesian framework,
+ The probable ranges of model parameters inferred from observational data are often tested in a Bayesian framework,
  once prior and likelihood are specified,
  by employing Monte Carlo samplers.
 \end_layout
@@ -360,14 +363,14 @@ For each problem,
 
 \begin_layout Section
 Method:
- Characterization of parametric inference
+ Characterisation of parametric inference
 \end_layout
 
 \begin_layout Standard
 Various difficulties are encountered by different sub-disciplines.
  Here we specify six characteristics and give a mathematical definition for each.
  Finally,
- we present a visual presentation which characterizes the posterior degeneracies.
+ we present a visual presentation which characterises the posterior degeneracies.
 \end_layout
 
 \begin_layout Subsection
@@ -461,7 +464,7 @@ Here,
 
 is nats,
  and approximately means how many e-foldings it takes to cut the prior until the posterior is reached.
- Finding that small region can be a challenge for sampling algorithms (and maximum likelihood minimizers).
+ Finding that small region can be a challenge for sampling algorithms (and maximum likelihood minimisers).
 \end_layout
 
 \begin_layout Standard
@@ -631,7 +634,7 @@ To mathematically define multi-modality,
  we adopt a very simple,
  heuristic approach.
  First,
- histograms of the marginal posteriors are histogrammed into 20 bins.
+ histograms of the marginal posteriors in physical coordinates are histogrammed into 20 bins.
  Bins with density less than 1/5 of the peak density are considered 
 \begin_inset Quotes eld
 \end_inset
@@ -759,7 +762,9 @@ The Gaussianity of a posterior can be easily measured through the surprise from 
  so that when the prior dominates,
  regardless of the chosen prior distribution,
  the posterior is not Gaussian but uniformly distributed.
- We then define the non-Gaussianity as:
+ We then define the non-Gaussianity,
+ normalised by the number of parameters,
+ as:
  
 \begin_inset Formula 
 \[
@@ -793,6 +798,62 @@ Width
 \end_inset
 
 )
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement document
+alignment document
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename /mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/evaluateproblems_volratio_vs_dim.pdf
+	width 100col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:width"
+
+\end_inset
+
+The ratio of 
+\begin_inset Formula $97.5\%$
+\end_inset
+
+ and 
+\begin_inset Formula $2.5\%$
+\end_inset
+
+ quantiles of the volume compared to dimensionality.
+ Red crosses are Gaussian likelihoods,
+ which follow the quantile ratio of a 
+\begin_inset Formula $\chi_{d}^{2}$
+\end_inset
+
+-distribution (black curve).
+ We use the black curve to normalise.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -837,22 +898,50 @@ nolink "false"
 \begin_inset Formula $97.5\%$
 \end_inset
 
- quantiles of the volume ranges where most of the probability mass resides,
- and compute the tail weight as:
+ quantiles of the volume ranges where most of the probability mass resides.
+ Figure
+\begin_inset space \thinspace{}
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:width"
+
+\end_inset
+
+ shows 
+\begin_inset Formula $V_{97.5\%}/V_{2.5\%}$
+\end_inset
+
+ for our inference problems.
+ The expectation from Gaussian posterior shells,
+ from quantiles of the chi-square distribution with d degrees of freedom,
+ is:
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula 
 \[
-\mathrm{TW}=\log_{10}\left(\frac{V_{97.5\%}}{V_{2.5\%}}\right)-\log_{10}d
+\mathrm{TW}_{0}=\frac{F_{\chi_{d}^{2}}^{-1}(0.975)}{F_{\chi_{d}^{2}}^{-1}(0.025)}\approx1.2\times\sqrt{d}
 \]
 
 \end_inset
 
-The log-dimensionality is subtracted because we observe that for a Gaussian,
- 
-\begin_inset Formula $\left(\frac{V_{97.5\%}}{V_{2.5\%}}\right)$
+Normalising by this,
+ we compute the tail weight as:
+\begin_inset Formula 
+\[
+\mathrm{TW}=\log_{10}\left(\frac{V_{97.5\%}}{V_{2.5\%}}\right)/\mathrm{TW}_{0}
+\]
+
 \end_inset
 
- increases linearly with the dimensionality.
- In practice,
+
+\end_layout
+
+\begin_layout Standard
+In practice,
  the mapping of volume and likelihood,
  as well as the normalising constant,
  the marginal likelihood integrated over volume shrinkages,
@@ -1117,7 +1206,7 @@ Here the denominator with
 
 ,
  as described above.
- This therefore measures the impact of the phase transition on the posterior weight.
+ This therefore measures the impact of the phase transition on the posterior.
  By construction,
  
 \begin_inset Formula $\Phi\geq1$
@@ -1186,19 +1275,19 @@ nolink "false"
 Corner plots only consider the posterior distribution.
  However,
  to express the experience of a sampler fairly,
- the characterization should consider also the prior.
+ the characterisation should consider also the prior.
  Here we work with the posterior samples expressed with coordinates on the prior cumulative probability distribution (probability integral transform).
  In the case of nested samplers working with prior transforms based on the unit hyper-cube,
  this merely means we take the un-transformed posterior samples.
  First,
- we characterize the linear degeneracies.
+ we characterise the linear degeneracies.
  the pair-wise Pearson correlation coefficient 
 \begin_inset Formula $\rho_{\mathrm{Pearson}}$
 \end_inset
 
  is calculated for each posterior parameter pair.
  Secondly,
- we characterize residual non-linear degeneracies.
+ we characterise residual non-linear degeneracies.
  On each parameter pair,
  we compute the Spearman correlation coefficient 
 \begin_inset Formula $\rho_{\mathrm{Spearman}}$
@@ -1241,8 +1330,8 @@ nolink "false"
 
 .
  The diagonal shows the parameter information gain,
- the lower triangle indicates the linear degeneracies and the upper triangle indicates the non-linear degeneracies.
- In the case of a un-correlated Gaussian,
+ the lower left entries indicates the linear degeneracies and the upper right entries indicates the non-linear degeneracies.
+ In the case of a uncorrelated Gaussian,
  illustrated in the right panel of Figure
 \begin_inset space ~
 \end_inset
@@ -1363,12 +1452,12 @@ nolink "false"
 \end_inset
 
  from 0 to 1),
- with darker color indicating stronger correlation.
+ with darker colour indicating stronger correlation.
  Similarly,
  the upper right triangle in orange shows Spearman rank correlation between parameter posteriors,
  after removing the linear correlations.
  The diagonal entries in green indicate the information gain on the parameter,
- increasing from white to darker colors.
+ increasing from white to darker colours.
  Here,
  some parameters are uninformative while others are highly informative.
 \end_layout
@@ -1938,7 +2027,7 @@ https://github.com/JohannesBuchner/space-of-inference-spaces/
 
 ,
  allowing researchers to test with identical priors and likelihoods.
- The parameter spaces and posterior distributions have been characterized and cast into a space of parametric inference spaces.
+ The parameter spaces and posterior distributions have been characterised and cast into a space of parametric inference spaces.
 \end_layout
 
 \begin_layout Standard
@@ -2033,8 +2122,8 @@ nolink "false"
 \end_inset
 
  demonstrates that real inference problems can have stronger degeneracies than toy problems.
- There is more work to be done to create toy inference problems that closely mimick real physics inference.
- In this vain,
+ There is more work to be done to create toy inference problems that closely mimic real physics inference.
+ In this vein,
  we provide several small data sets which are easy to work with yet represent real physics data analysis (e.g.,
  multisine,
  compton-thick-AGN,
@@ -2346,14 +2435,14 @@ literal "false"
 
  demonstrated that optimization algorithms can be derived by machine learning.
  Perhaps a similar breakthrough can be accomplished for optimal Bayesian inference sampling procedures,
- by providing a open,
+ by providing an open,
  large data base and a clear objective.
  To this end,
  the survey of inference problems encountered across cosmology,
  particle physics,
  astrophysics and astronomy is presented.
  The representative database includes fully specified likelihood and priors in a runnable docker image with python interfaces.
- While similar previous work has focusd on providing simplified models that serve as unit-tests 
+ While similar previous work has focused on providing simplified models that serve as unit tests 
 \begin_inset CommandInset citation
 LatexCommand citep
 before "e.g.,"
@@ -2368,7 +2457,7 @@ literal "false"
 
 \begin_layout Standard
 As a first step,
- existing and novel algorithms can be judged across the parameter space of problems for their empirical behavior and robustness,
+ existing and novel algorithms can be judged across the parameter space of problems for their empirical behaviour and robustness,
  and to make well-founded recommendation for specific applications.
  For more rapid testing and a unified interface,
  fast model emulators for the provided real-world examples would be useful.
@@ -2389,9 +2478,11 @@ literal "false"
 \end_layout
 
 \begin_layout Acknowledgments
-I thank Frederik Beaujean for insightful conversations.
+I thank Frederik Beaujean for insightful conversations,
+ the referee,
+ Andrew Fowlie for constructive comments that improved the paper and Jürgen Degenfellner for feedback on the reproducibility of the code.
  I thank Gana Moharram,
- who studied the IceCube neutrino analysis for a bachelor thesis with Philipp Eller,
+ who studied the IceCube neutrino analysis for a bachelor thesis co-supervised with Philipp Eller,
  for insightful conversations.
 \end_layout
 
@@ -2811,7 +2902,7 @@ J0544.4+2238 (log-uniform from
 \end_inset
 
 ),
- and the isotropic background normalization and the galactic background factor.
+ and the isotropic background normalisation and the galactic background factor.
  
 \end_layout
 
@@ -2886,7 +2977,7 @@ literal "false"
 
 \begin_layout Standard
 The model parameters include the properties of the planet (period P in days,
- time-of-transit center t0,
+ time-of-transit centre t0,
  planet-to-star radius ratio p,
  eccentricity ecc,
  argument of periastron passage omega),
@@ -3041,7 +3132,7 @@ literal "false"
  except that the periodic signal can be asymmetric due to ellipticity,
  giving 5 parameters per planet (signal amplitude,
  period,
- pericenter time,
+ pericentre time,
  eccentricity and mean anomaly) that describe a Keplerian orbit.
  Additionally,
  the white noise amplitude 
@@ -4037,7 +4128,7 @@ Asymmetric Gaussian
 \begin_layout Standard
 Integration of a Gaussian distribution is a standard test problem.
  The variation here introduces some parameter inequality and spreads the means in a sine pattern,
- so that the posterior is not at the center of the prior range.
+ so that the posterior is not at the centre of the prior range.
 \end_layout
 
 \begin_layout Standard

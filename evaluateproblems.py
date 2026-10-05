@@ -13,12 +13,21 @@ from collections import defaultdict
 import corner
 #from getdist import MCSamples, plots
 from ultranest.netiter import MultiCounter, PointPile, TreeNode, BreadthFirstIterator, combine_results
-from ultranest.mlfriends import AffineLayer, ScalingLayer, RobustEllipsoidRegion, bounding_ellipsoid
+from ultranest.mlfriends import AffineLayer, ScalingLayer, RobustEllipsoidRegion
 import scipy.stats
 
 
 from joblib import Memory
 mem = Memory('.', verbose=False)
+
+
+def gaussian_problem_width_quantile(d):
+    lo = scipy.stats.chi2.ppf(0.025, d)
+    hi = scipy.stats.chi2.ppf(0.975, d)
+    return 0.5 * d * np.log(hi / lo) / np.log(10)
+
+def gaussian_problem_width_simple(d):
+    return 1.2 * np.sqrt(d)
 
 
 def logz_sequence(root, pointpile, nbootstraps=12, random=True, onNode=None, verbose=False, check_insertion_order=True):
@@ -384,8 +393,8 @@ def convex_completion(x, y):
 def visualise_logVcurve(folder, problem_name, logvol, p, logl, logz):
     volmax, volmid, volmin = np.interp([0.025, 0.50, 0.975], p, logvol)
     logl_convex = convex_completion(logvol[::-1], logl[::-1])[::-1]
-    logz_simple = np.log(np.trapz(np.exp(logvol), np.exp(logl - logl.max()))) + logl.max()
-    logz_convex = np.log(np.trapz(np.exp(logvol), np.exp(logl_convex - logl_convex.max()))) + logl_convex.max()
+    logz_simple = np.log(np.trapezoid(np.exp(logvol), np.exp(logl - logl.max()))) + logl.max()
+    logz_convex = np.log(np.trapezoid(np.exp(logvol), np.exp(logl_convex - logl_convex.max()))) + logl_convex.max()
     plt.figure()
     plt.subplot(1, 2, 1)
     plt.plot(np.exp(logvol), np.exp(logl - logl.max()))
@@ -481,38 +490,27 @@ def visualise_problem(folder, problem_name, info, eqsamples):
         del i
 
     default_i, default_j = 0, 1
-    default_smooth_scale_2D = 1.1
     if problem_name == 'multisine' and len(paramnames) > 3:
         i, j = 2, 3
-        smooth_scale_2D = default_smooth_scale_2D
     elif problem_name == 'asymgauss':
         i, j = 0, -1
-        smooth_scale_2D = default_smooth_scale_2D
     elif problem_name == 'compton-thick-AGN':
         i, j = 0, 2
-        smooth_scale_2D = 2.0
     elif problem_name == 'lennard-jones-6':
         i, j = 4, 6
-        smooth_scale_2D = 3.0
     elif problem_name == 'gravwave-ligo':
         i, j = default_i, default_j
-        smooth_scale_2D = 3.0
     elif problem_name == 'beta':
         i, j = default_i, default_j
-        smooth_scale_2D = 3.0
     elif problem_name.startswith('exo-rv') and len(paramnames) > 3:
         i, j = 0, 3
-        smooth_scale_2D = default_smooth_scale_2D
     elif problem_name == 'cmb-planck':
         i, j = 1, 4
-        smooth_scale_2D = 3.0
     elif problem_name == 'rosenbrock':
         i, j = default_i, default_j
-        smooth_scale_2D = 2.0
     else:
         print("plotting first two parameters for:", problem_name)
         i, j = default_i, default_j
-        smooth_scale_2D = default_smooth_scale_2D
 
     levels = 1.0 - np.exp(-0.5 * np.arange(1.0, 4.1, 1.0) ** 2)
     try:
@@ -785,7 +783,7 @@ def count_posterior_modes(problem_name, eqsamples, problem_dimensionality):
 
     # 2) find all combinations of cuts and deduplicate
     cluster_assignment = -np.ones(len(eqsamples), dtype=int)
-    nmodes_max = np.product([len(t) for t in thresholds])
+    nmodes_max = np.prod([len(t) for t in thresholds])
     # deduplicate:
     if nmodes_max > 10000:
         print("  cannot consider all %d clustering combinations ..." % (nmodes_max))
@@ -872,7 +870,7 @@ def evaluate_problem(problem_name, folder, sequence, results, livepoint_sequence
     
     problem_depth = -volmid / np.log(10) / problem_dimensionality
     # problem_width = compute_problem_width(logvol, p, logl)
-    problem_width = abs(volmax - volmin) / np.log(10) - np.log10(problem_dimensionality)
+    problem_width = abs(volmax - volmin) / np.log(10) / gaussian_problem_width_simple(problem_dimensionality)
     
     prob = results['weighted_samples']['weights']
     logL = results['weighted_samples']['logl']
@@ -1043,8 +1041,64 @@ def plot_volcurves(LVs, colors, real_problems, mock_problems):
     plt.savefig("evaluateproblems_volcurve.pdf", bbox_inches='tight')
     plt.close()
 
+def plot_ingredients_vs_dimension(problem_names, properties_list, colors, real_problems, mock_problems):
+    """
+    Two small plots:
+      Left:  volume quantile ratio (problem_width, index 2) vs dimension (index 0)
+      Right: non-gaussianity KL divergence (index 5) vs dimension (index 0)
+    Both include a line showing the dimension correction.
+    """
+    properties = np.array(properties_list)
+    dims = properties[:, 0]
+    widths = properties[:, 2]       # volume quantile ratio (width)
+    nongauss = properties[:, 5]     # non-gaussianity KL divergence
+
+    dim_line = np.linspace(dims.min(), dims.max(), 200)
+
+    fig, ax = plt.subplots(figsize=(4, 4))
+    used = set()
+    for pname, d, w in zip(problem_names, dims, widths):
+        color = colors.get(pname, 'gray')
+        m = 'o' if pname in real_problems else ('s' if pname in mock_problems else 'x')
+        ax.plot(d, w * gaussian_problem_width_simple(d), marker=m, color=color, ls='', ms=4,
+                mfc='None' if pname not in real_problems else color,
+                alpha=0.5 if pname == 'spike+slab' else 1)
+        used.add(pname)
+    # dimension correction line: width ~ log10(dim)
+    # ax.plot(dim_line, 3 + np.log10(dim_line), 'k--', lw=1.5)
+    #ax.plot(dim_line, 1.2 * dim_line**0.5, 'k-', lw=1.5)
+    #ax.plot(dim_line, gaussian_problem_width_simple(dim_line), 'k:', lw=1.5)
+    ax.plot(dim_line, gaussian_problem_width_quantile(dim_line), 'k-', lw=1.5)
+    ax.set_xlabel('Dimension')
+    ax.set_xscale('log')
+    ax.set_ylabel('Volume quantile ratio')
+    ax.set_yscale('log')
+    ax.set_ylim(1, 30)
+
+    plt.savefig("evaluateproblems_volratio_vs_dim.pdf")
+    plt.close()
+
+    fig, ax = plt.subplots(figsize=(4, 4))
+    used = set()
+    for pname, d, g in zip(problem_names, dims, nongauss):
+        color = colors.get(pname, 'gray')
+        m = 'o' if pname in real_problems else ('s' if pname in mock_problems else 'x')
+        ax.plot(d, g * d, marker=m, color=color, ls='', ms=4,
+                mfc='None' if pname not in real_problems else color,
+                alpha=0.5 if pname == 'spike+slab' else 1)
+        used.add(pname)
+    # dimension correction line: non-gaussianity ~ 1/sqrt(dim)
+    ax.plot(dim_line, dim_line / 10., 'k--', lw=1.5)
+    ax.set_xlabel('Dimension')
+    ax.set_ylabel('Non-Gaussianity (KL)')
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+
+    plt.savefig("evaluateproblems_nongauss_vs_dim.pdf")
+    plt.close()
+
+
 def main(filename):
-    #properties_names_short = ["ndim", "multimodality", "non-gaussianity", "asymmetry", "width", "depth"]
     properties_names_short = ['dim', 'depth', 'width', 'modes', 'asym', '!gauss', 'phase']
     properties_names = ["Dimensionality", "Depth", "Width", "Modes", "Inequality", "Non-Gaussianity", 'Phase Transition']
 
@@ -1170,7 +1224,10 @@ def main(filename):
     plt.legend(loc='lower right', ncol=3, bbox_to_anchor=(1.0, 0.9))
     plt.savefig("evaluateproblems_spacestructure.pdf", bbox_inches='tight')
     plt.close()
-        
+
+    plot_ingredients_vs_dimension(
+        problem_names, properties_list, colors, real_problems, mock_problems)
+
 
 if __name__ == '__main__':
     main(sys.argv[1])

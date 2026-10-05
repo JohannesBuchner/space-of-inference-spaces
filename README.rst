@@ -2,7 +2,7 @@
 Representative collection of inference problems in astronomy, cosmology and particle physics
 =============================================================================================
 
-A `draft paper <https://github.com/JohannesBuchner/space-of-inference-spaces/blob/main/pres/problems2.pdf>`_ is in pres/
+The `paper <https://arxiv.org/abs/2608.06078>`_ has been submitted to A&A!
 
 This repository contains a set of inference problems for Bayesian inference samplers which test:
 
@@ -148,44 +148,7 @@ Outputs
 
 For reference, outputs based on ultranest are available here:
 
-* https://www.mpe.mpg.de/~jbuchner/TEMP/reference-run-output.tar.gz
+* 10.5281/zenodo.23148495
 
 problems.txt gives the mapping of folder and problem name.
 
-TODO
-----
-
-Help is welcome! We need you!
-
-If you run into any issues, please open a github issue!
-
-Please read the paper draft and provide feedback? Are there references missing, can the text be improved?
-Can you suggest a journal that may be interested?
-
-If you have difficult inference problems:
-
-* Do you have additional toy problems that cover a new parameter space that should be added? 
-  Ideally it should be motivated by some physics problem.
-* Can you provide ground truth results from fine integrations?
-* Is the Lennard-Jones potential implemented sensibly?
-
-If you develop software:
-
-* Maybe add your own sampler? Which problems can it run?
-* Try to reproduce one example, if you run into problems, report as an issue.
-* Can you help bring the uniform interface (autosampler.py) into forks of montepython, 3ML, mosfit or posteriorstacker
-  so we have a uniform interface for these as well?
-
-If you have machine learning experience:
-
-* Can you add a deep learning emulator to accelerate the very slow likelihood of icecube?
-* Can we approximate nested sampling run outputs with a fast, analytic model, so that we have a very similar inference problem but know the truth? For example, approximate with a gaussian mixture model or a deep neural network that predicts the log-likelihood?
-
-If you a like to help, but are unsure how, send me an email or open a github issue.
-
-For substantial contributions, co-authorship will be offered.
-
-More information
-----------------
-
-A `draft paper <https://github.com/JohannesBuchner/space-of-inference-spaces/blob/main/pres/problems2.pdf>`_ is in pres/

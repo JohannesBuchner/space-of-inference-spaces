@@ -3,10 +3,17 @@
 \documentclass[a4paper,oneside,onecolumn,british,twocolumn,latin9]{aa}
 \usepackage[T1]{fontenc}
 \setcounter{tocdepth}{3}
+\usepackage{babel}
 \usepackage{cprotect}
 \usepackage{url}
 \usepackage{amsmath}
 \usepackage{graphicx}
+\usepackage[pdfusetitle,
+ bookmarks=true,bookmarksnumbered=false,bookmarksopen=false,
+ breaklinks=false,pdfborder={0 0 0},pdfborderstyle={},backref=false,colorlinks=false]
+ {hyperref}
+\hypersetup{
+ unicode=true}
 
 \makeatletter
 
@@ -20,10 +27,10 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
 \titlerunning{A space of parameter spaces in the space sciences}
+\usepackage{xcolor}
 
 \makeatother
 
-\usepackage{babel}
 \begin{document}
 \title{A space of inference spaces in the space sciences}
 \subtitle{Parametric Bayesian inference in astronomy, cosmology and particle
@@ -32,14 +39,14 @@ physics}
 cosmology and particle physics is studied, augmented by mock data
 sets and toy problems. The parameter spaces of these parametric physical
 models and their posterior distributions from analysing specific data
-are characterized by (1) the number of model parameters, (2) whether
+are characterised by (1) the number of model parameters, (2) whether
 the posterior shape is similar to a Gaussian, (3) whether the posterior
 has light or heavy tails, (4) how small the posterior is compared
 to the prior, i.e., how informative the data are, (5) whether some
 parameters remain unconstrained while others are highly constrained,
 (6) whether the posterior has multiple, disconnected modes, and (7)
-whether the inference undergoes phase transitions. These axis define
-a parameter space of inference problems. We characterize each of the
+whether the inference undergoes phase transitions. These axes define
+a parameter space of inference problems. We characterise each of the
 inference problems and observe that inference in astrophysics spans
 the entire parameter space, from low to high dimensionality, mono-
 to multi-modal, and a variety of complex distributions that range
@@ -66,15 +73,15 @@ physical properties are often inferred indirectly from remotely sensed
 data. Accurate modelling of the measurement process, including signal
 formation, instrumental filtering, noise, calibration uncertainties,
 and other nuisance parameters, is therefore essential for obtaining
-stable and physically meaningful inferences \citet{Craig1986,Loredo2024,Feigelson2020}.
+stable and physically meaningful inferences \citep{Craig1986,Loredo2024,Feigelson2020}.
 Some examples include fitting the power spectrum of the Cosmic Microwave
 Background (CMB) with Dark Energy and Cold Dark Matter ($\Lambda$CDM)
 cosmologies \citep[e.g.,][]{Trotta2008}, fitting time series of the
 radial velocity of a host star gravitationally pulled by its exoplanets
 \citep[e.g.,][]{Ford2007}, dissecting multiple components in spectra
 and population inference from uncertain measurements of many individual
-objects, such as luminosity or mass functions. The probably ranges
-of model parameters inferred from observationally data are often tested
+objects, such as luminosity or mass functions. The probable ranges
+of model parameters inferred from observational data are often tested
 in a Bayesian framework, once prior and likelihood are specified,
 by employing Monte Carlo samplers.
 
@@ -84,22 +91,23 @@ chain Monte Carlo (MCMC), nested sampling and sequential Monte Carlo
 (SMC), among other methods \citep{Hesterberg2002,Skilling2004,Bardenet2013}.
 Specific implementations of these algorithms can differ in their initialization,
 exploration strategy, proposal or transition mechanism, adaptation
-scheme, and termination or convergence criteria \citep{Neal2011,Tierney1994,Dai2022,Buchner2021c,Ashton2022}.
+scheme, and termination or convergence criteria \citep{Tierney1994,Neal2011,Dai2022,Buchner2021c,Ashton2022}.
 The choice and tuning of these components depend on the target distribution
 and the computational characteristics of the application, such as
 dimensionality, dependence between parameters, multimodality, and
 the availability of parallel computation. The reliability of parameter
 recovery can be assessed by simulating datasets from a model with
 known parameters and then applying the inference procedure to those
-datasets \citep{Talts2018,Direnzo2023}. A complementary strategy
-is to deliberately construct toy inference problems that reproduce
-selected features of the real problem while being easier to understand
-and faster to analyse. Because inference problems differ substantially
-in their structure, it is useful to compare different algorithms on
-the same problem. A preliminary step towards a holistic understanding
-of Monte Carlo samplers is to identify similarities and differences
-of inference problems. It is the aim of this work to provide one (not
-necessarily unique) quantification of the space of inference problems.
+datasets \citep[simulation-based calibration;][]{Talts2018,Direnzo2023}.
+A complementary strategy is to deliberately construct toy inference
+problems that reproduce selected features of the real problem while
+being easier to understand and faster to analyse. Because inference
+problems differ substantially in their structure, it is useful to
+compare different algorithms on the same problem. A preliminary step
+towards a holistic understanding of Monte Carlo samplers is to identify
+similarities and differences of inference problems. It is the aim
+of this work to provide one (not necessarily unique) quantification
+of the space of inference problems.
 
 Inference problems differ substantially by the posterior distribution
 that a Monte Carlo sampler has to explore. The main characteristics
@@ -128,11 +136,11 @@ For each problem, the likelihood function $L(\theta)$ is defined
 together with prior distribution $\pi(\theta)$ over the parameter
 space. 
 
-\section{Method: Characterization of parametric inference}
+\section{Method: Characterisation of parametric inference}
 
 Various difficulties are encountered by different sub-disciplines.
 Here we specify six characteristics and give a mathematical definition
-for each. Finally, we present a visual presentation which characterizes
+for each. Finally, we present a visual presentation which characterises
 the posterior degeneracies.
 
 \subsection{Dimensionality}
@@ -155,7 +163,7 @@ require the derivatives of likelihood functions to effectively navigate
 the parameter space. The availability of likelihood derivatives could
 be considered an additional classification category.
 
-\subsection{Information gain (``Depth'')}
+\subsection{Information gain (\textquotedblleft Depth\textquotedblright )}
 
 Depending on the data quality of the experiment, the posterior may
 be a tiny region of the prior, or be identical with the prior. This
@@ -170,7 +178,7 @@ vector space $\theta$. In the case of a base-e logarithm, the unit
 of $D_{\mathrm{KL}}$is nats, and approximately means how many e-foldings
 it takes to cut the prior until the posterior is reached. Finding
 that small region can be a challenge for sampling algorithms (and
-maximum likelihood minimizers).
+maximum likelihood minimisers).
 
 In practice, the information gain is already computed by nested sampling
 algorithms internally for error estimation, and we adopt that method
@@ -205,19 +213,31 @@ a proposal tuned to a single mode may reach another distant mode with
 vanishing proposal probability. The bottom row of Figure~\ref{fig:pairwise-posterior}
 shows examples of multimodal distributions.
 
+In the literature, a vast diversity of definitions exist. Mixtures
+of Gaussian components can be fitted to samples, and the needed number
+of components determined \citep[e.g.,][]{McLachlan1987,Keribin2000}.
+However, the number of mixture components may indicate skewness and
+heavytailed distributions rather than the number of modes, which depends
+on component overlap and covariance structure \citep{Ray2005}. Given
+a smooth fitted density, modality can be defined through local maxima
+or basins \citep[e.g.][]{Genovese2016,chacon2019mixture}. Here, however,
+we are primarily interested in low-probability regions that isolate
+high-probability regions from each other. Such gaps are complex degeneracies
+that are physically interesting, but also of practical interest, as
+Monte Carlo samplers may find them difficult to traverse. 
+
 To mathematically define multi-modality, a threshold criterion is
-needed to define disconnectedness. In principle any clustering algorithm
-can be used. For simplicity and reproducibility, we adopt a very simple,
-heuristic approach. First, histograms of the marginal posteriors are
-histogrammed into 20 bins. Bins with density less than 1/5 of the
-peak density are considered ``empty''. Gaps are identified, and
-thresholds that bracket the peaks extracted. This is repeated for
-every dimension. Then, all combinations of brackets are computed.
-These are the clusters. If posterior samples are members of multiple
-clusters, the clusters are merged. The number of remaining, non-empty
-clusters is the number of modes of the problem. A more rigorous (and
-likely more complex) approach of mode counting is left for future
-work.
+needed to define disconnectedness. For simplicity and reproducibility,
+we adopt a very simple, heuristic approach. First, histograms of the
+marginal posteriors in physical coordinates are histogrammed into
+20 bins. Bins with density less than 1/5 of the peak density are considered
+``empty''. Gaps are identified, and thresholds that bracket the
+peaks extracted. This is repeated for every dimension. Then, all combinations
+of brackets are computed. These are the clusters. If posterior samples
+are members of multiple clusters, the clusters are merged. The number
+of remaining, non-empty clusters is the number of modes of the problem.
+A more rigorous (and likely more complex) approach of mode counting
+is left for future work.
 
 \subsection{Non-Gaussianity}
 
@@ -237,33 +257,47 @@ green dashed) relative to a Gaussian (blue dashed).}
 
 \end{figure*}
 
-The Bernstein--von Mises theorem states that when the data are highly
-informative, the posterior is shaped like a multi-variate Gaussian.
-Then, Laplace's approximation of the posterior with a log-quadratic
-density function is justified. This can furthermore occur if the model
-is linear in its parameters, or a first-order Taylor expansion of
-the model provides a reasonable approximation at the maximum a posteriori.
-For this reason, some algorithms are constructed to behave optimally
-when the posterior is Gaussian (see e.g., Laplace approximation).
+The Bernstein--von Mises theorem states that the posterior is shaped
+like a multi-variate Gaussian for many classes of models if the number
+of data is large. Then, Laplace's approximation of the posterior with
+a log-quadratic density function is justified. This can furthermore
+occur if the model is linear in its parameters, or a first-order Taylor
+expansion of the model provides a reasonable approximation at the
+maximum a posteriori. For this reason, some algorithms are constructed
+to behave optimally when the posterior is Gaussian (see e.g., Laplace
+approximation).
 
 The Gaussianity of a posterior can be easily measured through the
 surprise from a best-fitting multi-variate Gaussian $G=N(\mu,\Sigma)$
 to the posterior, $D_{KL}(P||G)=\int P(\theta)\log\frac{P(\theta)}{\pi(\theta)}d\theta$.
 We obtain a suitable Gaussian from the mean $\mu$ and covariance
-$\Sigma$ of the posterior samples. We then define the non-Gaussianity
-as: 
+$\Sigma$ of the posterior samples. The result is dependent on the
+parameterisation. We use posterior samples in the unit cube, so that
+when the prior dominates, regardless of the chosen prior distribution,
+the posterior is not Gaussian but uniformly distributed. We then define
+the non-Gaussianity, normalised by the number of parameters, as: 
 \[
 NG=D_{KL}(P||G)\thinspace/\thinspace d
 \]
 In multi-modal cases, the posterior is highly non-Gaussian, $G$ is
-a poor approximation, and thus $NG$ is high.
+a poor approximation, and thus $NG$ is high. 
 
-\subsection{Tail weight (``Width'')}
+\subsection{Tail weight (\textquotedblleft Width\textquotedblright )}
+
+\begin{figure}
+
+\includegraphics[width=1\columnwidth]{/mnt/data/daten/PostDoc2/research/stats/space-of-inference-spaces/evaluateproblems_volratio_vs_dim}
+
+\caption{\protect\label{fig:width}The ratio of $97.5\%$ and $2.5\%$ quantiles
+of the volume compared to dimensionality. Red crosses are Gaussian
+likelihoods, which follow the quantile ratio of a $\chi_{d}^{2}$-distribution
+(black curve). We use the black curve to normalise.}
+\end{figure}
 
 While the posterior may have ellipsoidal contours like a Gaussian,
 the posterior density may decline steeper or shallower than a square-exponential,
 i.e., have thin or heavy tails. For example, when outliers are allowed
-(e.g., in student-t distribution or explicit outlier modelling), the
+(e.g., in Student-t distribution or explicit outlier modelling), the
 wings of the posterior can be wide. Some algorithms may be optimized
 for square-exponential declines. Another cause of heavy tails is when
 most data points are fitted well by one component, and a minor component
@@ -277,16 +311,23 @@ To quantify how the weight is distributed over the prior volume, we
 compute the prior volume above a given likelihood threshold. This
 is illustrated in Figure~\ref{fig:volcurve}. We compute the $2.5\%$
 and $97.5\%$ quantiles of the volume ranges where most of the probability
-mass resides, and compute the tail weight as:
+mass resides. Figure\,\ref{fig:width} shows $V_{97.5\%}/V_{2.5\%}$
+for our inference problems. The expectation from Gaussian posterior
+shells, from quantiles of the chi-square distribution with d degrees
+of freedom, is:
+
 \[
-\mathrm{TW}=\log_{10}\left(\frac{V_{97.5\%}}{V_{2.5\%}}\right)-\log_{10}d
+\mathrm{TW}_{0}=\frac{F_{\chi_{d}^{2}}^{-1}(0.975)}{F_{\chi_{d}^{2}}^{-1}(0.025)}\approx1.2\times\sqrt{d}
 \]
-The log-dimensionality is subtracted because we observe that for a
-Gaussian, $\left(\frac{V_{97.5\%}}{V_{2.5\%}}\right)$ increases linearly
-with the dimensionality. In practice, the mapping of volume and likelihood,
-as well as the normalising constant, the marginal likelihood integrated
-over volume shrinkages, are already computed by nested sampling. We
-cap the value at $\mathrm{TW}=7$.
+Normalising by this, we compute the tail weight as:
+\[
+\mathrm{TW}=\log_{10}\left(\frac{V_{97.5\%}}{V_{2.5\%}}\right)/\mathrm{TW}_{0}
+\]
+
+In practice, the mapping of volume and likelihood, as well as the
+normalising constant, the marginal likelihood integrated over volume
+shrinkages, are already computed by nested sampling. We cap the value
+at $\mathrm{TW}=7$.
 
 \subsection{Inequality}
 
@@ -332,28 +373,38 @@ data is first approximated, and then fine tuning a second component
 onto a subset of the data leads to a rapid further increase in the
 likelihood. The situation has been likened in \citet{skilling2009nested}
 to condensation of a water vapor into liquid water, where small temperature
-changes leads to a sudden change in volume. This can affect some inference
+changes leads to a sudden change in volume. In the thermodynamics
+analogy of Monte Carlo inference algorithms such as simulated annealing
+and nested sampling, \citet{skilling2009nested} discussed that in
+phase transitions the slope of the likelihood-volume curve deviates
+strongly from a power law with index -1. This can affect some inference
 techniques, because the relevant geometry of the (proposal) space
 before and after the transition is radically different. 
 
-We measure the presence and the impact of phase transitions. \citet{skilling2009nested}
-discussed that the slope of the likelihood-volume curve deviates strongly
-from a power law with index -1. Figure~\ref{fig:phasetransition}
+Whether a phase transition is important and even experienced depends
+on the Monte Carlo algorithm. Nested sampling needs to navigate phase
+transitions across the entire range of likelihood $L$ values, while
+Markov Chain Monte Carlo algorithms may primarily navigate the posterior
+bulk and thus be insensitive to low-$L$ phase transitions. Here,
+our aim is to focus on phase transitions that impact the bulk posterior.
+
+We measure the presence and the impact of phase transitions. Figure~\ref{fig:phasetransition}
 illustrates a phase transition in blue, with a wide plateau followed
 by a spike of small volume. Here, from each point on the curve we
 extrapolate a power law with index -1 rightward (purple in Figure~\ref{fig:phasetransition})
 and use it to raise all points to the right of the curve to the extrapolation.
 From both the modified curve $L'(V)$ and the original curve $L(V)$,
-we compute the evidence, and consider the ratio as our phase transition
-indicator:
+we compute the evidence, and consider the evidence ratio as our phase
+transition indicator:
 \[
 \Phi=\frac{\int L'(V)\,dV}{\int L(V)\,dV}
 \]
 Here the denominator with $L$ is the normal nested sampling computation
 of the evidence, while the numerator contains the modified curve,
-$L'$, as described above. By construction, $\Phi\geq1$. If no phase
-transitions are present, $\Phi\approx1$, while $\Phi>1$ indicates
-phase transitions.
+$L'$, as described above. This therefore measures the impact of the
+phase transition on the posterior. By construction, $\Phi\geq1$.
+If no phase transitions are present, $\Phi\approx1$, while $\Phi>1$
+indicates phase transitions.
 
 \subsection{Compact visualisation of posterior structure}
 
@@ -370,15 +421,15 @@ The upper and lower triangles are populated with correlation coefficients
 of pairs of parameters.
 
 Corner plots only consider the posterior distribution. However, to
-express the experience of a sampler fairly, the characterization should
+express the experience of a sampler fairly, the characterisation should
 consider also the prior. Here we work with the posterior samples expressed
 with coordinates on the prior cumulative probability distribution
 (probability integral transform). In the case of nested samplers working
 with prior transforms based on the unit hyper-cube, this merely means
-we take the un-transformed posterior samples. First, we characterize
+we take the un-transformed posterior samples. First, we characterise
 the linear degeneracies. the pair-wise Pearson correlation coefficient
 $\rho_{\mathrm{Pearson}}$ is calculated for each posterior parameter
-pair. Secondly, we characterize residual non-linear degeneracies.
+pair. Secondly, we characterise residual non-linear degeneracies.
 On each parameter pair, we compute the Spearman correlation coefficient
 $\rho_{\mathrm{Spearman}}$ of ordinary least square residuals. Since
 the least square regression has direction, for each pair we adopt
@@ -386,10 +437,10 @@ the lower $\rho_{\mathrm{Spearman}}$ of the two possible directions.
 
 The obtained matrix visualisation is demonstrated in Figure~\ref{fig:degeneracy-viz-example},
 corresponding to the corner plot in Figure~\ref{fig:corner-example-1}.
-The diagonal shows the parameter information gain, the lower triangle
-indicates the linear degeneracies and the upper triangle indicates
-the non-linear degeneracies. In the case of a un-correlated Gaussian,
-illustrated in the right panel of Figure~\ref{fig:degeneracy-viz-example},
+The diagonal shows the parameter information gain, the lower left
+entries indicates the linear degeneracies and the upper right entries
+indicates the non-linear degeneracies. In the case of a uncorrelated
+Gaussian, illustrated in the right panel of Figure~\ref{fig:degeneracy-viz-example},
 the off-diagonal elements are zero.
 
 \begin{figure*}
@@ -411,11 +462,11 @@ while others are very well constrained.}
 of the degeneracies, corresponding to Figure~\ref{fig:corner-example-1}.
 The lower left triangle in blue shows linear correlation between parameter
 posteriors ($|\rho_{\mathrm{Pearson}}|$ from 0 to 1), with darker
-color indicating stronger correlation. Similarly, the upper right
+colour indicating stronger correlation. Similarly, the upper right
 triangle in orange shows Spearman rank correlation between parameter
 posteriors, after removing the linear correlations. The diagonal entries
 in green indicate the information gain on the parameter, increasing
-from white to darker colors. Here, some parameters are uninformative
+from white to darker colours. Here, some parameters are uninformative
 while others are highly informative.}
 
 \begin{centering}
@@ -552,8 +603,20 @@ from astronomy, cosmology and particle physics. This is augmented
 by mock applications and toy problems. A reproducible installation
 is available at \footnote{\url{https://github.com/JohannesBuchner/space-of-inference-spaces/}},
 allowing researchers to test with identical priors and likelihoods.
-The parameter spaces and posterior distributions have been characterized
-and cast into a space of parametric inference spaces. 
+The parameter spaces and posterior distributions have been characterised
+and cast into a space of parametric inference spaces.
+
+This work focused on inference in astrophysics implemented in the
+respective community-maintained packages. A cross-disciplinary effort
+to compare the reliability of posterior distribution is posteriordb
+\citep{Magnusson2021}, which contains 147 posteriors of 120 models
+from diverse disciplines coded in Stan (and thus all differentiable).
+In astrophysics, several works have compared the performance of Monte
+Carlo inference algorithms \citep[e.g.,][]{Dunkley2005,Poppelaars2026,Albert2025}.
+Typically, there is a strong focus on toy problems and only one inference
+problem with real data from a particular sub-field. In this work,
+we focused on understanding the nature of parameter spaces encountered
+in inference across subfields of the space sciences.
 
 A major result of this work is that the parameter space structure
 of these inference spaces is highly diverse. This is illustrated in
@@ -573,7 +636,7 @@ exploring the parameter space of a real data analysis problem. In
 particular, Figure~\ref{fig:corr} demonstrates that real inference
 problems can have stronger degeneracies than toy problems. There is
 more work to be done to create toy inference problems that closely
-mimick real physics inference. In this vain, we provide several small
+mimic real physics inference. In this vein, we provide several small
 data sets which are easy to work with yet represent real physics data
 analysis (e.g., multisine, compton-thick-AGN, sample-dist, powerlaw-relation,
 lennard-jones). In the future, perhaps the more complex data analysis
@@ -639,18 +702,18 @@ to learn by gradient descent by gradient descent\textquotedblright{}
 paper \citep{Andrychowicz2016} demonstrated that optimization algorithms
 can be derived by machine learning. Perhaps a similar breakthrough
 can be accomplished for optimal Bayesian inference sampling procedures,
-by providing a open, large data base and a clear objective. To this
+by providing an open, large data base and a clear objective. To this
 end, the survey of inference problems encountered across cosmology,
 particle physics, astrophysics and astronomy is presented. The representative
 database includes fully specified likelihood and priors in a runnable
 docker image with python interfaces. While similar previous work has
-focusd on providing simplified models that serve as unit-tests \citep[e.g.,][]{inferencegym2020,Magnusson2021},
+focused on providing simplified models that serve as unit tests \citep[e.g.,][]{inferencegym2020,Magnusson2021},
 this work uses real-world inference with the software pipelines employed
 by researchers.
 
 As a first step, existing and novel algorithms can be judged across
-the parameter space of problems for their empirical behavior and robustness,
-and to make well-founded recommendation for specific applications.
+the parameter space of problems for their empirical behaviour and
+robustness, and to make well-founded recommendation for specific applications.
 For more rapid testing and a unified interface, fast model emulators
 for the provided real-world examples would be useful. This is left
 for future work.
@@ -660,13 +723,16 @@ playing artificial intelligences \citep{Bellemare2012} that learn
 optimal game playing strategies with reinforcement learning: A playground
 for learning optimal Bayesian inference algorithms.
 \begin{acknowledgements}
-I thank Frederik Beaujean for insightful conversations. I thank Gana
-Moharram, who studied the IceCube neutrino analysis for a bachelor
-thesis with Philipp Eller, for insightful conversations.
+I thank Frederik Beaujean for insightful conversations, the referee,
+Andrew Fowlie for constructive comments that improved the paper and
+Jürgen Degenfellner for feedback on the reproducibility of the code.
+I thank Gana Moharram, who studied the IceCube neutrino analysis for
+a bachelor thesis co-supervised with Philipp Eller, for insightful
+conversations.
 \end{acknowledgements}
 
 \bibliographystyle{aa}
-\bibliography{../../../../../PostDoc/literature/stats,/mnt/data/daten/PostDoc/literature/agn}
+\bibliography{/mnt/data/daten/PostDoc/literature/agn,/mnt/data/daten/PostDoc/literature/stats}
 
 \appendix
 
@@ -781,7 +847,7 @@ and spectral index (uniform from -10 to 10) of the ``super\_cutoff\_powerlaw''
 model for PSR~J0534+2200, the normalisation for the power law spectrum
 of NVSS~J052622+224801 (log-uniform from $10^{-20}$ to $1.1\times10^{-14}$)
 and 4FGL~J0544.4+2238 (log-uniform from $10^{-20}$ to $1.39\times10^{-13}$),
-and the isotropic background normalization and the galactic background
+and the isotropic background normalisation and the galactic background
 factor. 
 
 \subsection{Exoplanet transit observations}
@@ -797,7 +863,7 @@ for the implementation, which in turn uses batman \citep{Kreidberg2015}
 for the light curve modelling together with limb-darkening \citep{Kipping2013}.
 
 The model parameters include the properties of the planet (period
-P in days, time-of-transit center t0, planet-to-star radius ratio
+P in days, time-of-transit centre t0, planet-to-star radius ratio
 p, eccentricity ecc, argument of periastron passage omega), as well
 as nuisance parameters (dilution factor mdilution, offset relative
 flux mflux, jitter sigma, Limb-darkening parameters q1 and q2):
@@ -851,7 +917,7 @@ exercise, for their dataset 5 (shown in Figure~\ref{fig:Sine-data-1}).
 The exact specification of this problem is defined in \citep{Nelson2020}.
 Essentially, it is similar to a sine time series fit, except that
 the periodic signal can be asymmetric due to ellipticity, giving 5
-parameters per planet (signal amplitude, period, pericenter time,
+parameters per planet (signal amplitude, period, pericentre time,
 eccentricity and mean anomaly) that describe a Keplerian orbit. Additionally,
 the white noise amplitude $\sigma_{j}$ and the systematic velocity
 $C$ are free parameters, giving $2+N_{\mathrm{planets}}\times5$
@@ -1104,7 +1170,7 @@ and marginal likelihood $Z$ are given.
 
 Integration of a Gaussian distribution is a standard test problem.
 The variation here introduces some parameter inequality and spreads
-the means in a sine pattern, so that the posterior is not at the center
+the means in a sine pattern, so that the posterior is not at the centre
 of the prior range.
 
 \begin{align*}
