@@ -148,7 +148,7 @@ Outputs
 
 For reference, outputs based on ultranest are available here:
 
-* https://zenodo.org/records/23148495
+* https://doi.org/10.5281/zenodo.23148494
 
 problems.txt gives the mapping of folder and problem name.
 
